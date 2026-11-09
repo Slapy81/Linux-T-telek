@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Vizsgatételek - 6. Rész (II/5 - II/8)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --text: #1f2937;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-text: #38bdf8;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .tetel-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #2563eb;
+            margin-top: 24px;
+        }
+        h4 {
+            color: #0d9488;
+            margin-top: 18px;
+        }
+        ul, ol {
+            padding-left: 24px;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+        .vazlat-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-light);
+            padding: 14px;
+            margin: 16px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 14px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-title {
+            font-weight: bold;
+            color: #15803d;
+            margin-bottom: 8px;
+        }
+        @media print {
+            body { background-color: #fff; padding: 0; }
+            .tetel-card { box-shadow: none; border: none; padding: 0; margin-bottom: 60px; page-break-after: always; }
+            pre { white-space: pre-wrap; word-break: break-all; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Linux Operációs Rendszerek - Szóbeli Vizsgatételek<br><small style="font-size:0.6em; font-weight:normal;">6. Rész: II/5. – II/8. Tételek (Teljes, vágatlan kiadás)</small></h1>
+
+        <!-- II/5. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-5">
+            <h2>II/5. Tétel: Folyamatok prioritása, A Linux 2.6 vagy újabb folyamat ütemezője</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A Linux prioritási tartományai (0–139, PR vs. NI).</li>
+                    <li>A Nice érték fogalma, tartománya (-20 és 19 között) és beállítása (`nice`, `renice`).</li>
+                    <li>Ütemező algoritmusok evolúciója: $O(1)$ ütemező vs. **CFS (Completely Fair Scheduler)**.</li>
+                    <li>A CFS működési elve: Vörös-Fekete Fa (Red-Black Tree) és a `vruntime`.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Prioritási rendszerek a Linuxban</h4>
+            <p>A Linux kernel a folyamatok prioritását egy **0 és 139 közötti skálán** tartja nyilván (kisebb szám = magasabb prioritás):</p>
+
+            <pre>
+ 0 ──────────────────────── 99 | 100 ──────────────────────── 139
+   Real-Time Tartomány           Normál User Tartomány (SCHED_OTHER)
+   (SCHED_FIFO, SCHED_RR)        PR = 20 + NI  (NI: -20 .. +19)
+            </pre>
+
+            <ul>
+                <li><strong>Real-Time tartomány (0–99):** Szigorú valósidejű folyamatoknak. Elsőbbséget élveznek minden más folyamattal szemben.</li>
+                <li><strong>Normál tartomány (100–139):** Általános folyamatoknak. Alapértelmezett prioritásuk 120, amelyet a **Nice érték** módosít.</li>
+            </ul>
+
+            <h4>2. A Nice érték (NI)</h4>
+            <p>A **Nice érték (`NI`)** egy `-20` és `+19` közötti felhasználói finomhangoló érték:</p>
+            <ul>
+                <li><strong>`-20`:** A legkedvezőbb / legmagasabb prioritás (PR = $20 + (-20) = 0$). **Csak a root állíthat be negatív értéket!**</li>
+                <li><strong>`0`:** Alapértelmezett érték.</li>
+                <li><strong>`+19`:** A legalacsonyabb prioritás ("nagyon kedves", átengedi a CPU-t másoknak).</li>
+                <li><strong>Kiszámítási képlet:</strong> $\text{Kernel Prioritás (PR)} = 20 + \text{NI}$</li>
+                <li><strong>Parancsok:</strong>
+                    <ul>
+                        <li><code>nice -n -10 mycommand</code>: Új parancs indítása -10-es nice értékkel.</li>
+                        <li><code>renice -n 5 -p 1234</code>: Már futó 1234-es PID-ű folyamat prioritásának módosítása.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>3. A CFS (Completely Fair Scheduler - 2.6.23+) ütemező</h4>
+            <p>A korábbi $O(1)$ ütemezőt (Linux 2.6.0–2.6.22) leváltotta az Ingo Molnár által kifejlesztett **CFS (Completely Fair Scheduler)**:</p>
+
+            <ul>
+                <li><strong>Koncepció:** Egy ideális "Multi-tasking CPU"-t modellez, ahol minden folyamat egyenlő arányban kap a CPU teljesítményéből.</li>
+                <li><strong>A `vruntime` (Virtuális futási idő):** A CFS minden folyamathoz nyilvántart egy `vruntime` értéket, amely mérlegeli, mennyi CPU időt kapott a folyamat. A magasabb prioritású (negatív nice) folyamatok `vruntime`-ja lassabban növekszik.</li>
+                <li><strong>Vörös-Fekete Fa (Red-Black Tree - Self-balancing BST):** A CFS nem tömböket, hanem egy önkiegyensúlyozó bináris keresőfát használ. A fa legbaloldalibb eleme (leftmost node) tartalmazza a legkisebb `vruntime`-mal rendelkező folyamatot. A kernel **MINDIG a legbaloldalibb elemet választja ki futásra**. A keresési és beszúrási idő $O(\log N)$.</li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mit jelent a negatív Nice érték és ki állíthatja be?</strong><br>
+                <em>V:</em> A negatív Nice érték (pl. -10 vagy -20) magasabb prioritást biztosít a folyamatnak a CPU-idő elosztásánál. Biztonsági okokból kizárólag a rendszergazda (`root`) állíthat be negatív Nice értéket.</p>
+                <p><strong>K: Milyen adatstruktúrát használ a modern CFS ütemező és mi alapján dönt?</strong><br>
+                <em>V:</em> A CFS **Vörös-Fekete Fát (Red-Black Tree)** használ, és mindig a legkisebb virtuális futási idővel (`vruntime`) rendelkező, legbaloldalibb folyamatot választja ki futtatásra.</p>
+            </div>
+        </div>
+
+        <!-- II/6. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-6">
+            <h2>II/6. Tétel: Folyamatok vezérlése, állapotai, alapértelmezett akciók</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A szignálok (Signals) fogalma és működési mechanizmusa.</li>
+                    <li>A legfontosabb szignálok listája (SIGHUP, SIGINT, SIGKILL, SIGTERM, SIGSTOP, SIGCONT).</li>
+                    <li>Alapértelmezett akciók (Term, Core, Ign, Stop, Cont).</li>
+                    <li>Szignálküldő parancsok és Job Control (`kill`, `killall`, `pkill`, `jobs`, `fg`, `bg`).</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A Szignálok (Signals) fogalma</h4>
+            <p>A **szignál** egy aszinkron értesítés, amelyet a kernel küld egy folyamatnak egy esemény bekövetkeztéről. Amikor a szignál megérkezik, a folyamat futása megszakad, és a kernel végrehajtja a szignálhoz tartozó reakciót.</p>
+
+            <h4>2. A legfontosabb szignálok gyűjteménye (NAGYON FONTOS!)</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Szám</th>
+                        <th>Név</th>
+                        <th>Alapértelmezett akció</th>
+                        <th>Megragadható / Blokkolható?</th>
+                        <th>Leírás és használat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1</strong></td>
+                        <td><code>SIGHUP</code></td>
+                        <td>Term (Leállítás)</td>
+                        <td><strong>IGEN</strong></td>
+                        <td>Hangup. Eredetileg terminál-megszakadáskor küldte a kernel. Ma a **démonok konfigurációs fájljának újratöltésére** használatos (pl. <code>kill -1 $(pgrep nginx)</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2</strong></td>
+                        <td><code>SIGINT</code></td>
+                        <td>Term (Leállítás)</td>
+                        <td><strong>IGEN</strong></td>
+                        <td>Interrupt. A terminálon kiadott <code>Ctrl+C</code> billentyűkombináció küldi az előtérben futó folyamatnak.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>9</strong></td>
+                        <td><code>SIGKILL</code></td>
+                        <td>Term (Leállítás)</td>
+                        <td><strong>NEM!</strong></td>
+                        <td>**AZONNALI ERŐSZAKOS LEÁLLÍTÁS.** A kernel kezeli, a folyamat nem tudja megragadni, figyelmen kívül hagyni vagy letakarítani az erőforrásait.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>15</strong></td>
+                        <td><code>SIGTERM</code></td>
+                        <td>Term (Leállítás)</td>
+                        <td><strong>IGEN</strong></td>
+                        <td>**SZELÍD LEÁLLÍTÁSI KÉRELEM.** Alapértelmezett szignál a `kill` parancsnál. Lehetőséget ad a folyamatnak az adatmentésre és tiszta leállásra.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>18</strong></td>
+                        <td><code>SIGCONT</code></td>
+                        <td>Cont (Folytatás)</td>
+                        <td><strong>IGEN</strong></td>
+                        <td>Continue. Egy korábban felfüggesztett (`SIGSTOP`) folyamat futásának folytatása.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>19</strong></td>
+                        <td><code>SIGSTOP</code></td>
+                        <td>Stop (Felfüggesztés)</td>
+                        <td><strong>NEM!</strong></td>
+                        <td>**AZONNALI FELFÜGGESZTÉS.** A folyamat futását azonnal felfüggeszti a kernel. Nem megragadható! (Terminálon: <code>Ctrl+Z</code> szignálja a SIGTSTP / 20).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>3. Szignálküldő parancsok és Job Control</h4>
+            <ul>
+                <li><code>kill -15 1234</code> vagy <code>kill 1234</code>: SIGTERM küldése az 1234-es PID-re.</li>
+                <li><code>kill -9 1234</code>: SIGKILL erőszakos leállítás.</li>
+                <li><code>killall nginx</code>: SIGTERM küldése az **összes `nginx` nevű folyamatnak**.</li>
+                <li><code>pkill -u tamas python</code>: Minta alapján szűrt folyamatleállítás.</li>
+                <li><strong>Job Control (Háttér/Előtér kezelés a héjban):**
+                    <ul>
+                        <li><code>Ctrl+Z</code>: Az előtérben futó folyamat felfüggesztése (SIGTSTP) és háttérbe tétele.</li>
+                        <li><code>jobs</code>: A jelenlegi shell munkamenet háttérbeli feladatainak kilistázása.</li>
+                        <li><code>fg %1</code>: A 1-es számú háttérfeladat előtérbe hozása (Foreground).</li>
+                        <li><code>bg %1</code>: A felfüggesztett háttérfeladat indítása a háttérben (Background - SIGCONT).</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Melyik az a két szignál, amelyet a folyamatok NEM tudnak megragadni (catch) vagy figyelmen kívül hagyni (ignore)?</strong><br>
+                <em>V:</em> A **`SIGKILL` (9)** és a **`SIGSTOP` (19)** szignálokat a kernel közvetlenül kezeli, a folyamatok nem tudják felülbírálni azokat.</p>
+                <p><strong>K: Mi a különbség a `SIGTERM` (15) és a `SIGKILL` (9) között?</strong><br>
+                <em>V:</em> A `SIGTERM` egy szelíd kérés a leállásra, a folyamat elfoghatja, lementheti az adatait és bezárhatja a fájljait. A `SIGKILL` egy azonnali erőszakos leállítás a kernel által, lementési lehetőség nélkül.</p>
+            </div>
+        </div>
+
+        <!-- II/7. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-7">
+            <h2>II/7. Tétel: Az IPC lehetőségei Linux operációs rendszerben</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>Az IPC (Inter-Process Communication - Folyamatok közötti kommunikáció) fogalma.</li>
+                    <li>A 7 alapvető IPC technológia áttekintése.</li>
+                    <li>Osztott memória (Shared Memory) – A leggyorsabb IPC!</li>
+                    <li>Szinkronizáció szemafórokkal és socket alapú kommunikáció.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Az IPC fogalma és Technológiái</h4>
+            <p>Mivel a Linux virtuális memóriakezelése szigorúan elszigeteli a folyamatok memóriacímtereit egymástól, a folyamatok nem tudnak közvetlenül egymás memóriájába írni. Az **IPC (Inter-Process Communication)** azon kernel-mechanizmusok gyűjteménye, amelyek lehetővé teszik az adatok és szignálok cseréjét a folyamatok között.</p>
+
+            <h4>2. A 7 fő IPC technológia elemzése</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>IPC Technológia</th>
+                        <th>Adatátviteli irány és jelleg</th>
+                        <th>Részletes leírás és használati kör</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1. Szignálok (Signals)</strong></td>
+                        <td>Aszinkron 0-bájtos eseményjelzés.</td>
+                        <td>Nem alkalmas adatátvitelre, csak események értesítésére (pl. leállítás, felébresztés).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Névtelen Csővezeték (Pipe - <code>|</code>)</strong></td>
+                        <td>Egyirányú (Half-duplex) adatfolyam.</td>
+                        <td>A kernel memóriájában lévő puffer. **Kizárólag szülő-gyermek (rokon) folyamatok** használhatják (pl. <code>cat file | grep text</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3. Nevesített Csővezeték (FIFO)</strong></td>
+                        <td>Egyirányú (Half-duplex) adatfolyam.</td>
+                        <td>Fájlrendszerbeli bejegyzés (létrehozás: <code>mkfifo mypipe</code>). **Független folyamatok** is kommunikálhatnak rajta keresztül.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4. Osztott Memória (Shared Memory)</strong></td>
+                        <td>Kétirányú, **A LEGGYORSABB IPC!**</td>
+                        <td>A kernel kijelöl egy RAM tartományt, amit **mindkét folyamat virtuális címterébe bemapel**. Az adatcseréhez **nincs szükség kódmásolásra a kernelen keresztül**!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5. Szemafórok (Semaphores)</strong></td>
+                        <td>Szinkronizációs objektum.</td>
+                        <td>Nem adategyüttest továbbít, hanem számláló alapú szinkronizációt biztosít az osztott memória kritikus szekcióinak védelmére (versenyhelyzet / Race condition ellen).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>6. Unix Domain Socket (AF_UNIX)</strong></td>
+                        <td>Kétirányú (Full-duplex) bájtfolyam.</td>
+                        <td>Memóriabeli socket végpont. Helyi, nem hálózati folyamatok közötti nagy sebességű adatátvitelre szolgál.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>7. Network Socket (AF_INET)</strong></td>
+                        <td>Kétirányú (Full-duplex) hálózati stack.</td>
+                        <td>TCP/IP protokoll alapú adatcsere hálózaton keresztüli vagy helyi (`127.0.0.1`) folyamatok között.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Melyik a leggyorsabb IPC technológia Linux alatt és miért?</strong><br>
+                <em>V:</em> Az **Osztott memória (Shared Memory)**. Mert a kijelölt fizikai memóriatartomány közvetlenül be van térképezve a kommunikáló folyamatok címtartományába, így az adatcseréhez nincs szükség rendszermag-másolási (kernel buffer copy) overheadre.</p>
+                <p><strong>K: Mi a különbség az elnevezetlen csővezeték (Pipe) és a FIFO között?</strong><br>
+                <em>V:</em> A névtelen Pipe csak közös ősi kapcsolattal rendelkező (szülő-gyermek) folyamatok között használható. A FIFO egy nevesített fájlrendszerbeli bejegyzés, amelyet teljesen független folyamatok is megnyithatnak adatcserére.</p>
+            </div>
+        </div>
+
+        <!-- II/8. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-8">
+            <h2>II/8. Tétel: A Linux memória kezelési módszerei</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>Virtuális Memóriakezelés, Lapok (Pages) és Lapkeretek (Page Frames).</li>
+                    <li>Laphibák (Page Faults): Minor vs. Major Page Fault.</li>
+                    <li>Kernel memóriafoglalási algoritmusok: Buddy Allocator vs. Slab Allocator.</li>
+                    <li>Swap lapozás, Swappiness paraméter és az **OOM Killer (Out-Of-Memory)** működése.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Virtuális Memóriakezelés és Lapozás (Paging)</h4>
+            <p>A Linux virtuális memóriarendszert használ. A folyamatok nem a fizikai RAM címeket látják, hanem egy folytonos **virtuális címtartományt**. A memóriakezelés egysége a **4 KB-os memórialap (Page)**:</p>
+
+            <ul>
+                <li><strong>Page (Virtuális lap):** 4 KB-os blokk a folyamat virtuális címterében.</li>
+                <li><strong>Page Frame (Fizikai lapkeret):** 4 KB-os blokk a fizikai RAM-ban.</li>
+                <li><strong>MMU (Memory Management Unit):** Hardveres egység a CPU-ban, amely a laptáblák (Page tables) alapján valós időben fordítja a virtuális címeket fizikai RAM címekre. A gyorsítótára a **TLB (Translation Lookaside Buffer)**.</li>
+            </ul>
+
+            <h4>2. Laphibák (Page Faults)</h4>
+            <p>Amikor a folyamat olyan virtuális memóriacímhez nyúl, amely nincs feltöltve a fizikai RAM-ba, a CPU egy **Page Fault** megszakítást generál a kernel felé:</p>
+            <ul>
+                <li><strong>Minor Page Fault:** A keresett lap már a RAM-ban van (pl. megosztott könyvtárként), csak a laptábla bejegyzés hiányzott. Gyorsan feloldható.</li>
+                <li><strong>Major Page Fault:** A keresett lap **NINCS a RAM-ban** (lemezről vagy a Swap területből kell beolvasni). Lassú I/O művelettel jár!</li>
+            </ul>
+
+            <h4>3. Kernel Alokátorok: Buddy Allocator és Slab Allocator</h4>
+            <ul>
+                <li><strong>Buddy Allocator (Fizikai lapalokátor):** A fizikai RAM lapkereteit kezeli. A memóriát $2^n$ méretű blokkokra (1, 2, 4, 8, 16... lap) osztja. Amikor mentesül egy blokk, egyesíti a szomszédos "haverjával" (Buddy).</li>
+                <li><strong>Slab Allocator (Objektum alokátor):** A Buddy Allocator csak egész 4 KB-os lapokat tud adni. A kernelen belüli kisméretű struktúrák (inode-ok, folyamatleírók, socketek) hatékony foglalására a Slab Allocator a 4 KB-os lapokat apró, azonos méretű struktúra-pufferre (Slabs) szeleteli fel, elkerülve a belső töredezettséget.</li>
+            </ul>
+
+            <h4>4. Swap, Swappiness és az OOM Killer</h4>
+            <ul>
+                <li><strong>Swap terület:** A merevlemezen/SSD-n kijelölt partíció vagy fájl, ahová a kernel kiírja az inaktív memórialapokat, ha a fizikai RAM megtelt.</li>
+                <li><strong>`vm.swappiness` (0–100):** Kernel sysctl paraméter. Szabályozza, hogy a kernel milyen agresszívan lapozza ki az inaktív memóriát a Swap-re. (Alapértelmezett: 60. Szervereknél gyakran 10-20-ra állítják).</li>
+                <li><strong>OOM Killer (Out-Of-Memory Killer):** Amikor a RAM ÉS a Swap is teljesen kifogyott, a kernel OOM Killer alrendszere kiszámítja a futó folyamatok **`badness` pontszámát** (memóriahasználat aránya alapján), és a legmagasabb pontszámú folyamatot **`SIGKILL` (9) szignállal azonnal leállítja**, megmentve a rendszert a teljes lefagyástól.</li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a különbség a Minor és a Major Page Fault között?</strong><br>
+                <em>V:</em> A Minor Page Fault esetén a memórialap már a fizikai RAM-ban található, így lemez I/O nélkül, gyorsan feloldható. A Major Page Fault esetén a memórialap nincs a RAM-ban, azt a lassú lemezről vagy Swap-ből kell betölteni.</p>
+                <p><strong>K: Mi a feladata a Linux OOM Killer-nek?</strong><br>
+                <em>V:</em> Amikor a rendszer fizikai memóriája és Swap területe teljesen kimerül (Out-Of-Memory), az OOM Killer kiválasztja a legtöbb memóriát pazarló folyamatot, és `SIGKILL` szignállal leállítja azt a kernel összeomlásának megakadályozására.</p>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

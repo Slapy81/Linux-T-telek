@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Vizsgatételek - 2. Rész (I/5 - I/8)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --text: #1f2937;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-text: #38bdf8;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .tetel-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #2563eb;
+            margin-top: 24px;
+        }
+        h4 {
+            color: #0d9488;
+            margin-top: 18px;
+        }
+        ul, ol {
+            padding-left: 24px;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+        .vazlat-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-light);
+            padding: 14px;
+            margin: 16px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 14px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-title {
+            font-weight: bold;
+            color: #15803d;
+            margin-bottom: 8px;
+        }
+        @media print {
+            body { background-color: #fff; padding: 0; }
+            .tetel-card { box-shadow: none; border: none; padding: 0; margin-bottom: 60px; page-break-after: always; }
+            pre { white-space: pre-wrap; word-break: break-all; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Linux Operációs Rendszerek - Szóbeli Vizsgatételek<br><small style="font-size:0.6em; font-weight:normal;">2. Rész: I/5. – I/8. Tételek (Teljes, vágatlan kiadás)</small></h1>
+
+        <!-- I/5. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-5">
+            <h2>I/5. Tétel: Az EXT[234] fájlrendszer felépítése, a nyilvántartás struktúrái</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A lemez fizikai osztása: Blokkcsoportok (Block Groups) és struktúrájuk.</li>
+                    <li>A Szuperblokk (Superblock) szerepe és a biztonsági másolatok.</li>
+                    <li>Az Inode (Index Node) fogalma és részletes belső felépítése (mit tárol és mit NEM tárol).</li>
+                    <li>Adatblokk-címzési struktúrák: Közvetlen/Indirekt mutatók vs. Ext4 Extensek (Extents).</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Az Ext[234] fájlrendszer blokkcsoport-struktúrája</h4>
+            <p>Az Ext2, Ext3 és Ext4 fájlrendszerek a lemezterületet rögzített méretű <strong>adatblokkokra</strong> (Block: 1 KB, 2 KB vagy 4 KB) és ezen blokkokból álló <strong>Blokkcsoportokra (Block Groups)</strong> osztják a lemeztöredezettség csökkentése és az I/O fejmozgások minimálisra csökkentése érdekében.</p>
+
+            <pre>
++---------------------------------------------------------------------------------------------------+
+| BOOT SECTOR | BLOCK GROUP 0           | BLOCK GROUP 1           | ... | BLOCK GROUP N             |
++---------------------------------------------------------------------------------------------------+
+                     │
+                     ▼
++---------------------------------------------------------------------------------------------------+
+| Superblock | Group Descriptors | Block Bitmap | Inode Bitmap | Inode Table | Data Blocks          |
++---------------------------------------------------------------------------------------------------+
+            </pre>
+
+            <ul>
+                <li><strong>Superblock (Szuperblokk):</strong> A fájlrendszer legkritikusabb metaadat-struktúrája. Tárolja az összes blokk számát, a szabad blokkok és Inode-ok számát, a blokkméretet, a fájlrendszer állapotát (clean/dirty), a csatolások számát és az utolsó ellenőrzés idejét. Sérülése esetén a teljes fájlrendszer olvashatatlanná válik, ezért a kernel több blokkcsoport elején automatikusan **redundáns másolatokat** tart fenn belőle.</li>
+                <li><strong>Group Descriptors (Csoportleírók):</strong> Tárolja az adott blokkcsoporton belüli bitmap-ek és az Inode tábla kezdőblokk-címeit.</li>
+                <li><strong>Block Bitmap & Inode Bitmap:</strong> Egy-egy bitmaszk állomány, ahol minden bit egy-egy adatblokk vagy Inode foglaltsági állapotát jelzi (0 = szabad, 1 = foglalt).</li>
+                <li><strong>Inode Table (Inode tábla):** Rögzített méretű Inode struktúrák tömbje az adott blokkcsoportban.</li>
+                <li><strong>Data Blocks (Adatblokkok):** A tényleges fájltartalom vagy a könyvtárbejegyzések adatai.</li>
+            </ul>
+
+            <h4>2. Az Inode (Index Node) részletes felépítése</h4>
+            <p>Minden fájlhoz és könyvtárhoz pontosan egy Inode tartozik a fájlrendszerben. Az Inode mérete Ext4 esetén alapértelmezetten 256 bájt.</p>
+
+            <p><strong>KRITIKUS VIZSGAPONT: Mit tárol és mit NEM tárol az Inode?</strong></p>
+            <ul>
+                <li><strong>Az Inode TÁROJJA a fájl metaadatait:</strong>
+                    <ul>
+                        <li>Fájltípus és jogosultságok (File mode: SUID, SGID, Sticky bit + UGO jogok).</li>
+                        <li>Tulajdonos azonosítói: UID (User ID) és GID (Group ID).</li>
+                        <li>Fájlméret bájtokban.</li>
+                        <li>Időbélyegek: <code>atime</code> (access time - utolsó olvasás), <code>mtime</code> (modification time - utolsó tartalom-módosítás), <code>ctime</code> (change time - utolsó Inode/metaadat módosítás).</li>
+                        <li>Hard linkek száma (Link count: hány név hivatkozik erre az Inode-ra).</li>
+                        <li>Az adatblokkokra mutató pointerek vagy extensek.</li>
+                    </ul>
+                </li>
+                <li><strong>Az Inode NEM TÁROLJA:</strong>
+                    <ul>
+                        <li><strong>A fájl nevét!</strong> (A fájl nevét és az Inode szám összerendelését a szülőkönyvtár adatblokkja tárolja).</li>
+                        <li><strong>A fájl tényleges tartalmát!</strong> (Azt az adatblokkok tárolják).</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>3. Adatblokk-címzési struktúrák: Pointerek vs. Extensek (Extents)</h4>
+            <ul>
+                <li><strong>Ext2/Ext3 (Direkt és Indirekt mutatók):</strong> Az Inode 15 blokk-pointert tartalmazott. Az első 12 közvetlenül az adatblokkokra mutatott (4 KB blokkméretnél 48 KB-ig), a 13. egy egyszeres indirekt blokkra, a 14. egy kétszeres, a 15. egy háromszoros indirekt blokkra mutatott. Ez nagy fájloknál lassú és töredezett volt.</li>
+                <li><strong>Ext4 (Extensek - Extents):** Az Ext4 leváltotta a pointer-tömböt extensekre. Egy *Extent* egy egybefüggő adatblokk-tartományt ír le mindössze 2 értékkel: **[Kezdő blokkcím, Blokk-darabszám]**. Egyetlen Extent akár 128 MB egybefüggő adatot is le tud írni, ami drasztikusan csökkenti a metaadat-méretet és növeli az I/O teljesítményt.</li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Hol tárolódik a fájl neve az Ext4 fájlrendszerben?</strong><br>
+                <em>V:</em> A fájl neve **nem az Inode-ban** tárolódik, hanem a szülőkönyvtár (directory) adatblokkjában lévő könytárbejegyzésekben (Directory Entry), amelyek összekötik a szöveges fájlnevet a hozzá tartozó Inode számmal.</p>
+                <p><strong>K: Mi a különbség a `ctime` és az `mtime` között?</strong><br>
+                <em>V:</em> Az `mtime` (modification time) akkor frissül, amikor a fájl **tartalma** módosul (pl. szerkesztik a szöveget). A `ctime` (change time) akkor frissül, amikor a fájl **metaadata vagy Inode-ja** módosul (pl. jogosultságot `chmod`-ozunk, tulajdonost váltunk `chown`-nal vagy átnevezzük).</p>
+            </div>
+        </div>
+
+        <!-- I/6. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-6">
+            <h2>I/6. Tétel: A Linux fájl típusai, az egyes típusok használati köre</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A POSIX fájltípus koncepció: „Mindent fájlként kezelünk”.</li>
+                    <li>A 7 alapvető fájltípus részletes áttekintése az `ls -l` első karaktere alapján.</li>
+                    <li>Hard Link (Kemény hivatkozás) működése, korlátai és Inode kapcsolata.</li>
+                    <li>Soft Link / Symlink (Szimbolikus hivatkozás) működése, előnyei és a törött linkek.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A 7 alapvető fájltípus részletes elemzése</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Karakter</th>
+                        <th>Fájltípus neve</th>
+                        <th>Részletes leírás és használati kör</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>-</code></td>
+                        <td><strong>Rendes fájl</strong><br>(Regular file)</td>
+                        <td>Tetszőleges adatot tároló állomány (szöveg, bináris kód, kép, videó, adatbázis). Az Inode közvetlenül az adatblokkjaira mutat.</td>
+                    </tr>
+                    <tr>
+                        <td><code>d</code></td>
+                        <td><strong>Könyvtár</strong><br>(Directory)</td>
+                        <td>Speciális fájl, amelynek adatblokkjai <code>[Fájlnév ↔ Inode szám]</code> párok listáját tartalmazzák. Könyvtár nélkül a fájlok elérhetetlenek lennének.</td>
+                    </tr>
+                    <tr>
+                        <td><code>l</code></td>
+                        <td><strong>Szimbolikus link</strong><br>(Symbolic / Soft link)</td>
+                        <td>Önálló Inode-dal rendelkező speciális fájl, amelynek adatblokkja egy másik fájl vagy könyvtár **relatív vagy abszolút cél-útvonalát** tartalmazza (mutató).</td>
+                    </tr>
+                    <tr>
+                        <td><code>b</code></td>
+                        <td><strong>Blokk eszközfájl</strong><br>(Block device)</td>
+                        <td>Hardvereszközök leképezése a <code>/dev</code> alatt, amelyeken az adatátvitel **fix méretű blokkokban és memóriapufferen (Page Cache)** keresztül történik (pl. HDD/SSD partíciók: <code>/dev/sda1</code>, <code>/dev/nvme0n1p1</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><code>c</code></td>
+                        <td><strong>Karakteres eszközfájl</strong><br>(Character device)</td>
+                        <td>Hardvereszközök leképezése, ahol az adatátvitel **bájtról bájtra, pufferezetlenül** történik (pl. terminálok: <code>/dev/tty1</code>, soros portok: <code>/dev/ttyS0</code>, pszeudó eszközök: <code>/dev/null</code>, <code>/dev/zero</code>, <code>/dev/urandom</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><code>p</code></td>
+                        <td><strong>Nevesített csővezeték</strong><br>(FIFO / Named Pipe)</td>
+                        <td>Fájlrendszerbeli bejegyzés (létrehozás: <code>mkfifo pipe_name</code>), amely lehetővé teszi két független folyamat közötti **egyirányú IPC (Inter-Process Communication)** adatcserét a kernel memóriáján keresztül.</td>
+                    </tr>
+                    <tr>
+                        <td><code>s</code></td>
+                        <td><strong>Unix Domain Socket</strong></td>
+                        <td>Fájlrendszerbeli végpont (pl. <code>/run/systemd/private</code>, <code>/tmp/.X11-unix/X0</code>), amely **kétirányú, nagy sebességű IPC** kommunikációt biztosít helyi folyamatok között (pl. webszerver és adatbázis).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>2. Hard Link vs. Soft Link (Symlink) összehasonlítása</h4>
+
+            <pre>
+HARD LINK:
+[ Fájlnév A ] ──┐
+                ├───> [ INODE #12345 ] ───> [ ADATBLOKKOK ]
+[ Fájlnév B ] ──┘     (Link count = 2)
+
+SYMLINK:
+[ Fájlnév A ] ──────> [ INODE #12345 ] ───> [ ADATBLOKKOK ]
+                            ▲
+[ Symlink B ] ───> [ INODE #67890 ] ───> [ Célútvonal: "/path/to/Fájlnév A" ]
+            </pre>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Szempont</th>
+                        <th>Hard Link (Kemény hivatkozás)</th>
+                        <th>Soft Link / Symlink (Szimbolikus hivatkozás)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Létrehozó parancs</strong></td>
+                        <td><code>ln eredeti_fájl hard_link</code></td>
+                        <td><code>ln -s eredeti_fájl soft_link</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Inode azonosító</strong></td>
+                        <td>**Ugyanarra az Inode számra mutat**, mint az eredeti fájl.</td>
+                        <td>**Új, saját Inode számmal rendelkezik**.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fájlrendszer határok</strong></td>
+                        <td>**NEM keresztezhet** fájlrendszer-határokat (csak ugyanazon a partíción lehet).</td>
+                        <td>**Átléphet** más partícióra vagy hálózati csatolásra is.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Könyvtár hivatkozás</strong></td>
+                        <td>**NEM mutathat könyvtárra** (a körkörös hivatkozási hurkok elkerülése miatt).</td>
+                        <td>**Készíthető könyvtárra is**.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Eredeti fájl törlése</strong></td>
+                        <td>Az adat **MEGMARAD**, az Inode számlálója (link count) 1-gyel csökken. Az adatblokk csak akkor szabadul fel, ha az utolsó hard link is törlődik.</td>
+                        <td>A symlink **TÖRÖTT (broken link)** lesz, mert a cél-útvonalon megszűnt a fájl.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi történik a fizikai adatblokkokkal, ha letörlünk egy fájlt, amire 2 hard link mutatott?</strong><br>
+                <em>V:</em> Az adatblokkok megmaradnak, és a fájl adatai továbbra is hiánytalanul elérhetők a megmaradt másik hard link néven keresztül. Az Inode táblában a link számláló (link count) 2-ről 1-re csökken, de nem szabadul fel az Inode és a blokkok.</p>
+                <p><strong>K: Mi a különbség a blokk (b) és a karakteres (c) eszközfájlok között?</strong><br>
+                <em>V:</em> A blokk eszközfájlok (pl. lemezek) fix méretű blokkokban, memóriapuffereléssel továbbítják az adatot. A karakteres eszközfájlok (pl. terminál, soros port, null) bájtonként, pufferezetlenül, közvetlen adatfolyamként kommunikálnak.</p>
+            </div>
+        </div>
+
+        <!-- I/7. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-7">
+            <h2>I/7. Tétel: A Unix alap jogosultsági rendszere, alap és kiegészítő bitek, umask</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A DAC (Discretionary Access Control) UGO modellje: User, Group, Other.
+                    <li>A 3 alapvető jogosultság értelmezése (r, w, x) külön fájlokra és külön könyvtárakra!
+                    <li>Speciális/Kiegészítő bitek: SUID, SGID, Sticky Bit (oktális értékek és hatások).
+                    <li>Az `umask` működése, kiszámítása és szerepe a biztonságban.
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A DAC UGO jogosultsági modellje</h4>
+            <p>A Unix/Linux rendszereken minden fájlhoz és könyvtárhoz 3 alanycsoport és 3 alapvető jogosultság tartozik. Ezt az <code>ls -l</code> parancs kimenetében 9 karakter jelöli (pl. <code>rwxr-xr--</code>):</p>
+
+            <ul>
+                <li><strong>Alanycsoportok (UGO):</strong>
+                    <ul>
+                        <li><code>u</code> (User / Owner): A fájl tulajdonos felhasználója.</li>
+                        <li><code>g</code> (Group): A fájl tulajdonos csoportja.</li>
+                        <li><code>o</code> (Other / World): Mindenki más, aki nem a tulajdonos és nem tagja a csoportnak.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>2. Az alapvető jogosultságok értelmezése (Fájl vs. Könyvtár)</h4>
+            <p><strong>NAGYON GYAKORI VIZSGAPONT: A jogosultságok mást jelentenek fájlokon és könyvtárakon!</strong></p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bit</th>
+                        <th>Oktális</th>
+                        <th>Jelentése FÁJL esetén</th>
+                        <th>Jelentése KÖNYVTÁR esetén</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>r</code> (Read)</td>
+                        <td><strong>4</strong></td>
+                        <td>A fájl tartalmának olvasása (pl. <code>cat</code>, <code>less</code>).</td>
+                        <td>A könyvtárban lévő **fájlok neveinek kilistázása** (pl. <code>ls</code>). (Metaadatok olvasásához <code>x</code> is kell!).</td>
+                    </tr>
+                    <tr>
+                        <td><code>w</code> (Write)</td>
+                        <td><strong>2</strong></td>
+                        <td>A fájl tartalmának módosítása, felülírása. (Törlést a szülőkönyvtár w joga szabályozza!).</td>
+                        <td>Új fájlok **létrehozása, átnevezése és törlése** a könyvtárban (függetlenül a fájl saját írási jogától!).</td>
+                    </tr>
+                    <tr>
+                        <td><code>x</code> (Execute)</td>
+                        <td><strong>1</strong></td>
+                        <td>A fájl futtatása binárisként vagy shell szkriptként.</td>
+                        <td>**Belépés a könyvtárba** (<code>cd</code>) és áthaladás a könyvtárfán, valamint fájlok Inode metaadatainak elérése (<code>ls -l</code>).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>3. Speciális / Kiegészítő bitek (SUID, SGID, Sticky Bit)</h4>
+            <p>Az alapvető UGO jogokon kívül a fájlrendszer 3 speciális jogosultsági bitet is támogat, amelyeket oktális módnál az UGO elé írt 4. számjegy jelöl:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bit neve</th>
+                        <th>Oktális</th>
+                        <th>Hatása FÁJL-ra</th>
+                        <th>Hatása KÖNYVTÁR-ra</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>SUID</strong><br>(Set User ID)</td>
+                        <td><strong>4000</strong><br>(<code>rwsr-xr-x</code>)</td>
+                        <td>A fájl nem az őt indító felhasználó, hanem a **fájl TULAJDONOSÁNAK jogaival fut le** (pl. <code>/usr/bin/passwd</code> a jelszómódosításhoz shadow eléréssel).</td>
+                        <td>Nincs hatása Linux rendszereken.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SGID</strong><br>(Set Group ID)</td>
+                        <td><strong>2000</strong><br>(<code>rwxr-sr-x</code>)</td>
+                        <td>A fájl az őt indító felhasználó főcsoportja helyett a **fájl CSOPORTJÁNAK jogaival fut le**.</td>
+                        <td>A könyvtárban újonnan létrehozott fájlok és alkönyvtárak **automatikusan öröklik a szülőkönyvtár CSOPORTJÁT** (közös projektmappáknál elengedhetetlen!).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sticky Bit</strong><br>(Közös törlésvédelem)</td>
+                        <td><strong>1000</strong><br>(<code>rwxrwxrwt</code>)</td>
+                        <td>Nincs hatása (régi rendszereken a kód memóriában tartása volt).</td>
+                        <td>A könyvtárban lévő fájlokat **CSAK A FÁJL TULAJDONOSA vagy a root törölheti vagy nevezheti át** (pl. a bárki által írható <code>/tmp</code> és <code>/var/tmp</code> mappák).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>4. Az `umask` (User Mask) működése</h4>
+            <p>Az **`umask`** egy 3 vagy 4 számjegyű oktális maszk, amely meghatározza, hogy az újonnan létrehozott fájlok és könyvtárak **milyen jogosultságokat NE kapjanak meg** biztonsági okokból.</p>
+
+            <ul>
+                <li>A rendszer elméleti maximális alapjogai létrehozáskor:
+                    <ul>
+                        <li>Könyvtárak esetén: <code>777</code> (<code>rwxrwxrwx</code>)</li>
+                        <li>Fájlok esetén: <code>666</code> (<code>rw-rw-rw-</code>) — *Biztonsági okból fájl alapértelmezetten sosem kap `x` futtatási jogot!*</li>
+                    </ul>
+                </li>
+                <li><strong>Kiszámítási képlet:</strong> $\text{Létrejövő jog} = \text{Alapjog} - \text{umask}$ (vagy bináris ÉS-NEM művelet).</li>
+                <li><em>Példa:</em> Ha az `umask` értéke <code>022</code>:
+                    <ul>
+                        <li>Új könyvtár joga: $777 - 022 = \mathbf{755}$ (<code>rwxr-xr-x</code>)</li>
+                        <li>Új fájl joga: $666 - 022 = \mathbf{644}$ (<code>rw-r--r--</code>)</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi történik, ha egy könyvtárra van `r` olvasási jogunk, de nincs `x` futtatási jogunk?</strong><br>
+                <em>V:</em> Az <code>ls</code> paranccsal ki tudjuk listázni a könyvtárban lévő fájlok neveit, de nem tudunk belelépni (<code>cd</code>), nem tudjuk elolvasni a fájlok méretét, jogosultságait vagy tulajdonosát (<code>ls -l</code> kérdőjeleket ad), és nem érhetjük el a benne lévő fájlok tartalmát sem.</p>
+                <p><strong>K: Mi a szerepe az SGID bitnek egy könyvtáron?</strong><br>
+                <em>V:</em> Ha egy könyvtáron be van állítva az SGID bit (pl. <code>chmod g+s dir</code>), akkor a könyvtárban bárki által újonnan létrehozott fájlok és alkönyvtárak nem a létrehozó primér csoportját, hanem a szülőkönyvtár csoportját öröklik meg automatikusan.</p>
+            </div>
+        </div>
+
+        <!-- I/8. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-8">
+            <h2>I/8. Tétel: A Linux fájlhivatkozásai, hivatkozási speciális karakterek, jokerek</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>Abszolút és Relatív elérési utak fogalma, speciális könyvtári jelölések.</li>
+                    <li>Jokerkarakterek (Globbing) a Shellben: `*`, `?`, `[...]`, `{...}`.</li>
+                    <li>Idézőjelek és eszképelés (Escape): Single quotes (`'`), Double quotes (`"`), Visszaper (`\`).</li>
+                    <li>Parancs-behelyettesítés és változó-behelyettesítés szabályai az idézőjelekben.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Abszolút és Relatív elérési utak</h4>
+            <ul>
+                <li><strong>Abszolút elérési út:</strong> Mindig a gyökérkönyvtárból (<code>/</code>) indul ki, és a rendszer tetszőleges pontjáról egyértelműen azonosítja a fájlt (pl. <code>/var/log/nginx/access.log</code>).</li>
+                <li><strong>Relatív elérési út:</strong> Az aktuális munkakönyvtárból (amelyet a <code>pwd</code> mutat) indul ki, nem <code>/</code>-rel kezdődik (pl. <code>../etc/passwd</code>).</li>
+                <li><strong>Speciális hivatkozások:</strong>
+                    <ul>
+                        <li><code>.</code> : Az aktuális könyvtár.</li>
+                        <li><code>..</code> : A szülőkönyvtár (egy szinttel feljebb).</li>
+                        <li><code>~</code> : A bejelentkezett felhasználó saját Home könyvtára (pl. <code>/home/tamas</code>).</li>
+                        <li><code>~username</code> : Az adott nevű felhasználó Home könyvtára.</li>
+                        <li><code>-</code> : Visszavált az **előzőleg meglátogatott** munkakönyvtárba (<code>cd -</code>).</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>2. Jokerkarakterek (Globbing - Pathname Expansion)</h4>
+            <p>A Shell a parancs lefutása **előtt** értelmezi a jokerkaraktereket, és kicseréli azokat a illeszkedő fájlnevek listájára:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Karakter</th>
+                        <th>Jelentése és illesztési szabálya</th>
+                        <th>Példa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>*</code></td>
+                        <td>**Bármilyen 0 vagy több karakterből** álló karaktersorozatra illeszkedik (kivéve a rejtett fájlok kezdő pontját).</td>
+                        <td><code>ls *.txt</code> (minden .txt fájl), <code>rm a*</code> (minden 'a'-val kezdődő fájl).</td>
+                    </tr>
+                    <tr>
+                        <td><code>?</code></td>
+                        <td>**Pontosan 1 tetszőleges karakterre** illeszkedik.</td>
+                        <td><code>ls file?.txt</code> (file1.txt illeszkedik, de file10.txt nem).</td>
+                    </tr>
+                    <tr>
+                        <td><code>[...]</code></td>
+                        <td>A szögletes zárójelben megadott **karakterek bármelyikére** illeszkedik (karakterosztály). Range is használható.</td>
+                        <td><code>ls [a-z]*</code> (kisbetűvel kezdődők), <code>ls log_[0-9].txt</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><code>[^...]</code> vagy <code>[!...]</code></td>
+                        <td>**Negált osztály**: Bármilyen karakterre illeszkedik, ami **NINCS** a zárójelben.</td>
+                        <td><code>ls [^0-9]*</code> (nem számmal kezdődő fájlok).</td>
+                    </tr>
+                    <tr>
+                        <td><code>{...}</code></td>
+                        <td>**Brace Expansion (Generálás)**: Nem létező fájlokra is működik, karaktersorozatokat generál vesszővel elválasztva vagy tartományként.</td>
+                        <td><code>mkdir -p project/{src,bin,doc}</code>,<br><code>touch file{1..3}.txt</code> (file1.txt, file2.txt, file3.txt).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>3. Idézőjelek és Eszképelés (Quoting / Escaping)</h4>
+            <p>Amikor azt szeretnénk, hogy a Shell ne értelmezze a speciális karaktereket (pl. szóköz, <code>*</code>, <code>$</code>, <code>&</code>, <code>|</code>), eszképelést vagy idézőjeleket kell használnunk:</p>
+
+            <ul>
+                <li><strong>Visszaper (Escape character - <code>\</code>):** A közvetlenül utána álló egyetlen karakter speciális jelentését kikapcsolja (pl. <code>cat szóközös\ fájl.txt</code>, <code>echo \$VAR</code>).</li>
+                <li><strong>Egyes idézőjel (Single quotes - <code>'...'</code>):** **SZIGORÚ IDÉZŐJEL.** A benne lévő ÖSSZES karaktert literálisan (szó szerint) veszi. Még a változó-behelyettesítést (<code>$</code>) és a parancs-behelyettesítést sem hajtja végre!
+                    <br><em>Példa:</em> <code>echo 'A VAR értéke: $VAR'</code> $\rightarrow$ Kimenet: <code>A VAR értéke: $VAR</code></li>
+                <li><strong>Dupla idézőjel (Double quotes - <code>"..."</code>):** **LAZA IDÉZŐJEL.** Védi a szóközöket és a jokereket (<code>*</code>, <code>?</code>), DE **MEGENGEDI a változók (<code>$</code>), a parancs-behelyettesítés (<code>$(...)</code>) és a visszaper (<code>\</code>) kiértékelését!**
+                    <br><em>Példa:</em> <code>echo "A VAR értéke: $VAR"</code> $\rightarrow$ Kimenet: <code>A VAR értéke: 45</code></li>
+            </ul>
+
+            <div class="qa-box">

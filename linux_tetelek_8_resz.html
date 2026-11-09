@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Vizsgatételek - 8. Rész (II/13 - II/16)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --text: #1f2937;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-text: #38bdf8;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .tetel-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #2563eb;
+            margin-top: 24px;
+        }
+        h4 {
+            color: #0d9488;
+            margin-top: 18px;
+        }
+        ul, ol {
+            padding-left: 24px;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+        .vazlat-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-light);
+            padding: 14px;
+            margin: 16px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 14px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-title {
+            font-weight: bold;
+            color: #15803d;
+            margin-bottom: 8px;
+        }
+        @media print {
+            body { background-color: #fff; padding: 0; }
+            .tetel-card { box-shadow: none; border: none; padding: 0; margin-bottom: 60px; page-break-after: always; }
+            pre { white-space: pre-wrap; word-break: break-all; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Linux Operációs Rendszerek - Szóbeli Vizsgatételek<br><small style="font-size:0.6em; font-weight:normal;">8. Rész: II/13. – II/16. Tételek (Teljes, vágatlan kiadás)</small></h1>
+
+        <!-- II/13. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-13">
+            <h2>II/13. Tétel: Hálózati kiszolgálók és speciális hálózati képességek Linux alatt</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>Alapvető hálózati kiszolgálók (DHCP, DNS, Web, Samba, NFS, SSH).</li>
+                    <li>Csomagszűrés és Tűzfal: A Netfilter keretrendszer (`iptables` vs. `nftables`).</li>
+                    <li>Hálózati címfordítás (NAT: SNAT / Masquerading vs. DNAT / Port Forwarding).</li>
+                    <li>IP Forwarding, Network Bonding, Bridging és Network Namespaces.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Alapvető hálózati kiszolgálók</h4>
+            <ul>
+                <li><strong>DHCP Szerver (UDP 67/68):** `isc-dhcp-server`, `dnsmasq`. Automatikus IP-cím, maszk, átjáró és DNS osztás.</li>
+                <li><strong>DNS Szerver (UDP/TCP 53):** `bind9`, `unbound`. Névfeloldás (A, AAAA) és reverz feloldás (PTR).</li>
+                <li><strong>Webszerver:** `apache2`, `nginx`. HTTP (80) és HTTPS (443) kiszolgálás. Az Nginx kiváló Reverse Proxy is.</li>
+                <li><strong>Samba Szerver (TCP 445):** SMB/CIFS fájl- és nyomtatómegosztás **Linux és Windows gépek között**, AD DC integrációval.</li>
+                <li><strong>NFS Szerver (TCP 2049):** Network File System. POSIX-kompatibilis, nagy sebességű fájlmegosztás **kizárólag Linux/Unix gépek között**.</li>
+                <li><strong>OpenSSH Szerver (TCP 22):** Titkosított távoli shell elérés, pubkey hitelesítés, SCP/SFTP és port alagutazás (Tunneling).</li>
+            </ul>
+
+            <h4>2. Netfilter, Tűzfal és NAT</h4>
+            <p>A **Netfilter** a Linux kernelen belüli csomagszűrő keretrendszer:</p>
+            <ul>
+                <li><strong>`iptables` / `nftables`:** A Netfilter felhasználói felületei.
+                    <ul>
+                        <li>`PREROUTING`: Csomag beérkezésekor lefutó lánc (ideális **DNAT / Port Forwarding** végrehajtására).</li>
+                        <li>`POSTROUTING`: Csomag kiküldése előtt lefutó lánc (ideális **SNAT / Masquerading** végrehajtására).</li>
+                    </ul>
+                </li>
+                <li><strong>IP Forwarding (Routing feltétel!):** <code>sysctl -w net.ipv4.ip_forward=1</code></li>
+                <li><strong>Bonding vs. Bridging:**
+                    <ul>
+                        <li><em>Network Bonding:</em> Több kártya összefogása sávszélesség-növelésre vagy hibatűrésre (Failover).</li>
+                        <li><em>Network Bridge (`br0`):</em> Memóriabeli szoftveres switch virtuális gépek (KVM) és konténerek fizikai hálózatra kötésére.</li>
+                    </ul>
+                </li>
+                <li><strong>Network Namespaces (`ip netns`):** Elszigetelt hálózati stack-ek (Docker hálózatkezelés alapja).</li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a különbség az NFS és a Samba fájlmegosztó szolgáltatások között?</strong><br>
+                <em>V:</em> Az NFS egy natív Unix/Linux hálózati fájlrendszer Linux gépek közötti nagy sebességű megosztásra. A Samba az SMB/CIFS protokollt valósítja meg, így Linux és Windows rendszerek közötti fájlmegosztásra szolgál.</p>
+                <p><strong>K: Mi a feltétele annak, hogy egy Linux gép routerként továbbítsa a csomagokat az interfészei között?</strong><br>
+                <em>V:</em> Engedélyezni kell a kernelben az IP továbbítást: <code>net.ipv4.ip_forward = 1</code>.</p>
+            </div>
+        </div>
+
+        <!-- II/14. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-14">
+            <h2>II/14. Tétel: Az X Window System felépítése, működése</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>Az X11 (X Window System) alapelvei: Hálózati transzparencia és Mechanizmus vs. Házirend szétválasztása.</li>
+                    <li>Az X11 Ügyfél-Kiszolgáló (Client-Server) architektúrája.</li>
+                    <li>A grafikus környezet rétegei (Display Manager, Window Manager, Widget Toolkits, DE).</li>
+                    <li>Az X11 korlátai és a modern **Wayland** architektúra.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Az X11 Alapelvei és a Client-Server Modell</h4>
+            <ul>
+                <li><strong>Hálózati transzparencia:** Az X Kliens (alkalmazás) és az X Szerver (megjelenítő) futhat ugyanazon a gépen vagy hálózaton összekötött eltérő gépeken is.</li>
+                <li><strong>Mechanizmus vs. Házirend:** Az X11 csak a **mechanizmust** adja (grafikus primitívek rajzolása, beviteli események továbbítása), de nem határozza meg a **házirendet** (hogyan nézzen ki egy ablak, hol legyen a gomb). Ezt a felsőbb rétegek végzik.</li>
+                <li><strong>X Szerver (pl. Xorg):** A **felhasználó fizikai gépén fut**, kezeli a kijelzőt, billentyűzetet és egeret.</li>
+                <li><strong>X Kliens:** Maga a grafikus alkalmazás (pl. Firefox), ami az X11 hálózati protokollon keresztül küld rajzolási utasításokat a szervernek.</li>
+            </ul>
+
+            <h4>2. A Grafikus környezet rétegei és a Wayland</h4>
+            <ul>
+                <li><strong>Display Manager:** Grafikus bejelentkező felület (GDM, SDDM, LightDM).</li>
+                <li><strong>Window Manager (WM):** Az ablakok elrendezéséért, keretéért és átméretezéséért felel (i3wm, Openbox, Mutter, KWin).</li>
+                <li><strong>Widget Toolkits:** Rajzolási elemkészletek a fejlesztőknek (GTK, Qt).</li>
+                <li><strong>Munkakörnyezet (DE):** Egységes csomag (GNOME, KDE Plasma, XFCE).</li>
+                <li><strong>Wayland:** A modern utód. Megszünteti a különálló X szervert: az **Ablakkezelő (Compositor) maga a megjelenítő**. Képtörés-mentes (no screen tearing), közvetlen rajzolású és szigorúan biztonságos elszigetelést nyújt az ablakok között.</li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Miért mondjuk, hogy az X11 Client-Server architektúrájú és hol fut az X Szerver?</strong><br>
+                <em>V:</em> Mert szétválasztja a rajzoló alkalmazáskódot és a kijelző hardvert. Az **X Szerver a felhasználó helyi fizikai gépén fut**, mert ő kezeli a helyi képernyőt és beviteli eszközöket.</p>
+            </div>
+        </div>
+
+        <!-- II/15. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-15">
+            <h2>II/15. Tétel: A Linux disztribúció fogalma, a disztribúciók általános jellemzői</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A Linux disztribúció fogalma (Kernel + GNU + Init + Csomagkezelő + GUI).</li>
+                    <li>Csomagkezelő családok (.deb, .rpm, pacman).</li>
+                    <li>Kiadási modellek: Fix kiadásos (Fixed release) vs. Gördülő kiadásos (Rolling release).</li>
+                    <li>Főbb disztribúció-családok (Debian/Ubuntu, Red Hat/RHEL/Fedora, Arch, SUSE).</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A Disztribúció fogalma és Összetevői</h4>
+            <p>A **Linux önmagában csak a rendszermag (Kernel)**. A **Linux disztribúció** egy olyan teljes, használatra kész operációs rendszer, amely a kernel köré integrálja a `glibc` C könyvtárat, a GNU rendszereszközöket, az Init rendszert (systemd), a csomagkezelőt, a grafikus környezetet és a felhasználói szoftvereket.</p>
+
+            <h4>2. Kiadási modellek összehasonlítása</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Szempont</th>
+                        <th>Fix Kiadásos (Fixed / Point Release)</th>
+                        <th>Gördülő Kiadásos (Rolling Release)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Működés</strong></td>
+                        <td>Ciklikus főverziók (pl. 2 évente). A szoftververziók rögzítettek, csak biztonsági frissítéseket kapnak.</td>
+                        <td>Nincsenek főverziók. A rendszer folyamatosan frissül a legújabb szoftverekre.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Előny / Hátrány</strong></td>
+                        <td>**Rendkívül stabil**, tesztelt. Hátránya: régebbi szoftververziók.</td>
+                        <td>**Mindig a legfrissebb szoftverek**. Hátránya: nagyobb a frissítési törések kockázata.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Példák</strong></td>
+                        <td>Debian Stable, Ubuntu LTS, Red Hat Enterprise Linux (RHEL).</td>
+                        <td>Arch Linux, openSUSE Tumbleweed, Manjaro.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a különbség a Fix kiadású és a Gördülő kiadású disztribúciók között?</strong><br>
+                <em>V:</em> A Fix kiadású disztribúciók (pl. Debian, Ubuntu LTS) rögzített főverziókkal dolgoznak a maximális stabilitásért. A Gördülő kiadású disztribúciókban (pl. Arch Linux) nincsenek főverziók, a rendszer megszakítás nélkül frissül a legfrissebb csomagokra.</p>
+            </div>
+        </div>
+
+        <!-- II/16. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-16">
+            <h2>II/16. Tétel: Csomagkezelés Linux operációs rendszerben, csomagok fajtái és kezelésük, frontend-ek</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A csomagkezelés fogalma, célja és a szoftvertárolók (Repositories).</li>
+                    <li>Csomagok fajtái: Hagyományos bináris (`.deb`, `.rpm`), Forráskód alapú és Disztribúciófüggetlen (Flatpak, Snap, AppImage).</li>
+                    <li>A csomagkezelés rétegei: Alacsony szintű (`dpkg`, `rpm`) vs. Magas szintű (`apt`, `dnf`).</li>
+                    <li>Csomagkezelő Frontend-ek (TUI: `aptitude`, GUI: Synaptic, GNOME Software).</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Csomagok Fajtái és Formátumai</h4>
+            <ul>
+                <li><strong>Hagyományos bináris csomagok (`.deb`, `.rpm`):** Előre lefordított csomagok adott disztribúcióra és architektúrára. A közös rendszerkönyvtárakra támaszkodnak.</li>
+                <li><strong>Forráskód alapú csomagok:** A szoftver forráskódját tartalmazzák (`.tar.gz`), amit a helyi gépen kell lefordítani (pl. Gentoo `emerge`).</li>
+                <li><strong>Disztribúciófüggetlen, homokozósított (Sandboxed) csomagok:**
+                    <ul>
+                        <li><strong>Flatpak:** Asztali GUI alkalmazásokra fókuszál. Minden függőséget magában foglal, izoláltan fut (Flathub).</li>
+                        <li><strong>Snap:** A Canonical (Ubuntu) rendszere szerveres és asztali csomagokhoz. Csatolt SquashFS lemezképként fut.</li>
+                        <li><strong>AppImage:** Telepítést és root jogot **nem igénylő**, egyetlen futtatható hordozható bináris.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>2. Alacsony vs. Magas szintű csomagkezelők</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Család</th>
+                        <th>Csomagkiterjesztés</th>
+                        <th>Alacsony szintű eszköz (NINCS függőségkezelés!)</th>
+                        <th>Magas szintű eszköz (VAN automatikus függőségkezelés!)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Debian / Ubuntu / Mint</strong></td>
+                        <td><code>.deb</code></td>
+                        <td><code>dpkg -i csomag.deb</code></td>
+                        <td><code>apt install csomag</code> (vagy <code>apt-get</code>)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Red Hat / RHEL / Fedora</strong></td>
+                        <td><code>.rpm</code></td>
+                        <td><code>rpm -ivh csomag.rpm</code></td>
+                        <td><code>dnf install csomag</code> (régebben <code>yum</code>)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Arch Linux / Manjaro</strong></td>
+                        <td><code>.pkg.tar.zst</code></td>
+                        <td><code>pacman</code> (integrált)</td>
+                        <td><code>pacman -S csomag</code> (+ AUR)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>3. Csomagkezelő Frontend-ek</h4>
+            <ul>
+                <li><strong>TUI (Szöveges felület):** `aptitude` (Debian/Ubuntu ncurses felület intelligens függőségfeloldóval).</li>
+                <li><strong>GUI (Grafikus felület):** Synaptic Package Manager (részletes GTK csomagkezelő), GNOME Software, KDE Discover, YaST (openSUSE).</li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a különbség a `dpkg` és az `apt` parancsok között?</strong><br>
+                <em>V:</em> A `dpkg` az alacsony szintű csomagkezelő, amely csak egyetlen helyi `.deb` fájlt tud telepíteni, de nem éri el a hálózati tárolókat és **nem tudja feloldani a hiányzó függőségeket**. Az `apt` a magas szintű eszköz, amely a tárolókból automatikusan felkutatja és letölti a hiányzó függőségeket is.</p>
+                <p><strong>K: Mi a fő előnye a Flatpak/Snap csomagoknak a hagyományos `.deb`/`.rpm` csomagokkal szemben?</strong><br>
+                <em>V:</em> A Flatpak és Snap csomagok az alkalmazást és annak **összes függőségét egyetlen izolált (sandbox-olt) csomagban** tartalmazzák, így tetszőleges Linux disztribúción módosítás és függőségi konfliktusok nélkül futtathatók.</p>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

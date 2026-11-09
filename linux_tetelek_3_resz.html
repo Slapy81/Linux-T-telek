@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Vizsgatételek - 3. Rész (I/9 - I/12)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --text: #1f2937;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-text: #38bdf8;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .tetel-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #2563eb;
+            margin-top: 24px;
+        }
+        h4 {
+            color: #0d9488;
+            margin-top: 18px;
+        }
+        ul, ol {
+            padding-left: 24px;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+        .vazlat-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-light);
+            padding: 14px;
+            margin: 16px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 14px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-title {
+            font-weight: bold;
+            color: #15803d;
+            margin-bottom: 8px;
+        }
+        @media print {
+            body { background-color: #fff; padding: 0; }
+            .tetel-card { box-shadow: none; border: none; padding: 0; margin-bottom: 60px; page-break-after: always; }
+            pre { white-space: pre-wrap; word-break: break-all; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Linux Operációs Rendszerek - Szóbeli Vizsgatételek<br><small style="font-size:0.6em; font-weight:normal;">3. Rész: I/9. – I/12. Tételek (Teljes, vágatlan kiadás)</small></h1>
+
+        <!-- I/9. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-9">
+            <h2>I/9. Tétel: A Linux fájl- és könyvtárkezelő parancsai</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>Navigációs és listázó parancsok: `pwd`, `cd`, `ls`.</li>
+                    <li>Létrehozó, másoló, mozgató és törlő parancsok: `mkdir`, `cp`, `mv`, `rm`.</li>
+                    <li>Összetett keresőeszközök: `find` (szűrési opciók és akciók).</li>
+                    <li>Mintaillesztő szövegkereső: `grep` (szűrés és reguláris kifejezések).</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Navigáció és listázás</h4>
+            <ul>
+                <li><code>pwd</code> (Print Working Directory): Kiírja az aktuális munkakönyvtár abszolút útvonalát.</li>
+                <li><code>cd</code> (Change Directory): Munkakönyvtár-váltás.
+                    <ul>
+                        <li><code>cd /var/log</code>: Abszolút úttal.</li>
+                        <li><code>cd ..</code>: Váltás a szülőkönyvtárba.</li>
+                        <li><code>cd ~</code> vagy simán <code>cd</code>: Váltás a saját Home könyvtárba.</li>
+                        <li><code>cd -</code>: Visszaváltás az előzőleg meglátogatott könyvtárba.</li>
+                    </ul>
+                </li>
+                <li><code>ls</code> (List): Könyvtártartalom kilistázása.
+                    <ul>
+                        <li><code>ls -l</code>: Részletes (long) lista (típus, jogok, link szám, owner, group, méret, dátum, név).</li>
+                        <li><code>ls -a</code>: Rejtett (ponttal kezdődő) fájlokat is kijelzi.</li>
+                        <li><code>ls -h</code>: Emberi léptékű mértékegységek (K, M, G).</li>
+                        <li><code>ls -i</code>: Inode számok kijelzése.</li>
+                        <li><code>ls -R</code>: Rekurzív kilistázás az alkönyvtárakba is.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>2. Fájl- és könyvtárműveletek</h4>
+            <ul>
+                <li><code>mkdir</code> (Make Directory): Könyvtár létrehozása.
+                    <ul>
+                        <li><code>mkdir -p project/src/core</code>: Létrehozza a teljes szülőkönyvtár-láncot, ha még nem létezik.</li>
+                    </ul>
+                </li>
+                <li><code>cp</code> (Copy): Fájlok és könyvtárak másolása.
+                    <ul>
+                        <li><code>cp -r dir1 dir2</code>: Rekurzív könyvtármásolás.</li>
+                        <li><code>cp -p file1 file2</code>: Megőrzi az eredeti jogosultságokat, tulajdonost és időbélyegeket (preserve).</li>
+                        <li><code>cp -a dir1 dir2</code>: Archív másolás (egyenértékű: `-dpR`).</li>
+                    </ul>
+                </li>
+                <li><code>mv</code> (Move): Fájlok/könyvtárak mozgatása vagy átnevezése.
+                    <ul>
+                        <li><code>mv old.txt new.txt</code>: Átnevezés azonos könyvtárban.</li>
+                        <li><code>mv file.txt /tmp/</code>: Mozgatás más könyvtárba.</li>
+                    </ul>
+                </li>
+                <li><code>rm</code> (Remove): Fájlok és könyvtárak törlése.
+                    <ul>
+                        <li><code>rm -r dir</code>: Rekurzív törlés (alkönyvtárakkal együtt).</li>
+                        <li><code>rm -f file</code>: Kényszerített (force) törlés, nem kérdez rá és nem ad hibát hiányzó fájlnál.</li>
+                        <li><code>rm -rf dir</code>: Rekurzív, kényszerített könyvtártörlés.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>3. Összetett keresés: a `find` parancs</h4>
+            <p>A <code>find</code> rekurzívan átvizsgálja a fájlrendszer-fát megadott feltételek alapján:</p>
+            <pre>find [keresési_útvonal] [feltételek] [akciók]</pre>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feltétel / Kapcsoló</th>
+                        <th>Jelentése és használata</th>
+                        <th>Példa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>-name "minta"</code></td>
+                        <td>Keresés fájlnév alapján (kis/nagybetű érzékeny).</td>
+                        <td><code>find /var -name "*.log"</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>-iname "minta"</code></td>
+                        <td>Keresés fájlnév alapján (kis/nagybetű **független**).</td>
+                        <td><code>find . -iname "readme*"</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>-type t</code></td>
+                        <td>Keresés fájltípus szerint (<code>f</code>: rendes fájl, <code>d</code>: könyvtár, <code>l</code>: symlink).</td>
+                        <td><code>find /tmp -type f</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>-size [+-]n</code></td>
+                        <td>Keresés fájlméret alapján (<code>k</code>, <code>M</code>, <code>G</code>).</td>
+                        <td><code>find /home -size +100M</code> (100MB-nál nagyobbak)</td>
+                    </tr>
+                    <tr>
+                        <td><code>-mtime [+-]n</code></td>
+                        <td>Keresés módosítási idő alapján (napokban).</td>
+                        <td><code>find /var/log -mtime -7</code> (az elmúlt 7 napban módosultak)</td>
+                    </tr>
+                    <tr>
+                        <td><code>-user név</code> / <code>-group név</code></td>
+                        <td>Keresés tulajdonos vagy csoport alapján.</td>
+                        <td><code>find / -user tamas</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>-exec parancs {} \;</code></td>
+                        <td>A megtalált elemekre **tetszőleges parancs futtatása** (a <code>{}</code> helyére kerül a megtalált fájl).</td>
+                        <td><code>find /tmp -type f -name "*.tmp" -exec rm -f {} \;</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>4. Szövegkeresés fájlokban: a `grep` parancs</h4>
+            <p>A <code>grep</code> (Global Regular Expression Print) mintákat keres fájlokban vagy a standard bemeneten:</p>
+
+            <ul>
+                <li><code>grep "minta" fájl.txt</code>: Kiírja azokat a sorokat, amelyek tartalmazzák a mintát.</li>
+                <li><code>grep -i "minta" fájl.txt</code>: Kis- és nagybetű független keresés (case insensitive).</li>
+                <li><code>grep -v "minta" fájl.txt</code>: Invertált keresés (kiírja azokat a sorokat, amelyek **NEM** tartalmazzák a mintát).</li>
+                <li><code>grep -r "minta" /etc/</code>: Rekurzív keresés a könyvtár összes fájljában.</li>
+                <li><code>grep -n "minta" fájl.txt</code>: Kiírja a találatok sorszámát is.</li>
+                <li><code>grep -c "minta" fájl.txt</code>: Csak a találati sorok darabszámát adja vissza.</li>
+                <li><code>grep -E "minta1|minta2" fájl.txt</code>: ERE (Extended Regular Expression) használata.</li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a különbség a <code>find</code> és a <code>grep</code> parancsok között?</strong><br>
+                <em>V:</em> A <code>find</code> a **fájlrendszer struktúrájában** keres fájlokat és könyvtárakat azok attribútumai (név, méret, típus, dátum) alapján. A <code>grep</code> a **fájlok belsejében (szövegében)** keres adott mintára illeszkedő sorokat.</p>
+                <p><strong>K: Hogyan keressünk meg és töröljünk egyetlen paranccsal minden 30 napnál régebbi <code>.tmp</code> fájlt a <code>/tmp</code> könyvtárból?</strong><br>
+                <em>V:</em> <code>find /tmp -type f -name "*.tmp" -mtime +30 -exec rm -f {} \;</code></p>
+            </div>
+        </div>
+
+        <!-- I/10. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-10">
+            <h2>I/10. Tétel: Felhasználói csoportok, felhasználók és jelszavaik tárolása, hitelesítés</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A felhasználói és csoport-struktúra (UID, GID, primér és másodlagos csoportok).</li>
+                    <li>A `/etc/passwd` fájl szerkezete és a 7 mező pontos jelentése.</li>
+                    <li>A `/etc/shadow` fájl szerepe, biztonsági vonatkozásai és a 9 mező.</li>
+                    <li>Jelszó-hashing, a sózás (Salting) elve és a PAM (Pluggable Authentication Modules) keretrendszer.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Felhasználók és csoportok azonosítása</h4>
+            <p>A Linux rendszereken minden felhasználóhoz egy egyedi számazonosító, a **UID (User ID)**, és minden csoporthoz egy **GID (Group ID)** tartozik:</p>
+            <ul>
+                <li><strong>UID 0:</strong> A rendszergazda (`root`), korlátlan jogosultságokkal.</li>
+                <li><strong>UID 1–999:</strong> Rendszerfelhasználók (System accounts: `daemon`, `nobody`, `www-data`, `systemd-resolve`). Nincs interaktív héjuk (`/bin/false` vagy `/sbin/nologin`).</li>
+                <li><strong>UID 1000+:</strong> Normál interaktív felhasználók (pl. `tamas`).</li>
+            </ul>
+
+            <h4>2. A `/etc/passwd` fájl felépítése</h4>
+            <p>Mindenki által olvasható szöveges állomány (jogosultság: <code>644</code>), amely a fiókok alapvető tulajdonságait tárolja. Egy sor 7 mezőből áll, kettősponttal (<code>:</code>) elválasztva:</p>
+
+            <pre>tamas:x:1000:1000:Szónok Tamás:/home/tamas:/bin/bash</pre>
+
+            <ol>
+                <li><strong>Felhasználónév (Username):</strong> A bejelentkezési név (`tamas`).</li>
+                <li><strong>Jelszó jelölő:</strong> Régen a cryptelt jelszó volt itt, ma egy <code>x</code> betű jelzi, hogy a jelszó a biztonságos <code>/etc/shadow</code> fájlban van.</li>
+                <li><strong>UID:</strong> Felhasználói azonosító (`1000`).</li>
+                <li><strong>GID:</strong> Elsődleges (primér) csoport azonosítója (`1000`).</li>
+                <li><strong>GECOS / Komment:</strong> Felhasználó teljes neve, irodaszáma, telefonszáma.</li>
+                <li><strong>Home könyvtár:</strong> A felhasználó saját könyvtárának abszolút útja (`/home/tamas`).</li>
+                <li><strong>Default Shell:</strong> A bejelentkezéskor elinduló parancsértelmező (`/bin/bash`).</li>
+            </ol>
+
+            <h4>3. A `/etc/shadow` fájl felépítése</h4>
+            <p>Kizárólag a `root` által olvasható állomány (jogosultság: <code>600</code>). Tárolja a jelszó-hash-eket és a jelszólejárati házirend adatit 9 kettősponttal elválasztott mezőben:</p>
+
+            <pre>tamas:$6$v8KxJ...$aB9z...:19600:0:90:7::: </pre>
+
+            <ol>
+                <li><strong>Felhasználónév:</strong> Egyezik a `/etc/passwd`-ben lévővel.</li>
+                <li><strong>Encrypted Password Hash:</strong> A sózott jelszóhash. Ha <code>!</code> vagy <code>*</code> áll itt, a fiók zárolva van.</li>
+                <li><strong>Last change:</strong> A jelszó utolsó módosításának ideje (1970. jan. 1. óta eltelt napokban).</li>
+                <li><strong>Min days:</strong> Hány napnak kell eltelnie két jelszómódosítás között.</li>
+                <li><strong>Max days:</strong> Hány napig érvényes a jelszó (lejárat kényszerítése).</li>
+                <li><strong>Warn days:</strong> Hány nappal a lejárat előtt figyelmeztesse a felhasználót.</li>
+                <li><strong>Inact days:</strong> Hány nap türelmi idő van a lejárat után a fiók letiltásáig.</li>
+                <li><strong>Expire date:</strong> A fiók végső lejárati ideje (1970 óta eltelt napokban).</li>
+                <li><strong>Reserved:</strong> Fenntartott mező.</li>
+            </ol>
+
+            <h4>4. Jelszó-hashing, Sózás (Salting) és PAM</h4>
+            <ul>
+                <li><strong>Sózás (Salting):** A jelszó cryptográfiai hash-elésénél egy véletlenszerű karaktersorozatot (Salt) fűznek a nyers jelszóhoz a hash kiszámítása előtt. Ez megakadályozza az előre kiszámolt szótártámadásokat (Rainbow tables).
+                    <br>A hash prefixumok mutatják az alkalmazott algoritmust:
+                    <code>$1$</code> = MD5, <code>$5$</code> = SHA-256, <code>$6$</code> = SHA-512, <code>$y$</code> = Yescrypt (modern Debian/Ubuntu).</li>
+                <li><strong>PAM (Pluggable Authentication Modules):** A Linux moduláris hitelesítési keretrendszere (`/etc/pam.d/`). Különválasztja a szoftvereket a hitelesítési módszerektől. Lehetővé teszi, hogy az alkalmazások módosítása nélkül cseréljünk hitelesítési eljárást (pl. jelszó, 2FA/TOTP, biometria, LDAP, Kerberos).</li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Miért van szükség a `/etc/shadow` fájlra, miért nem a `/etc/passwd`-ben tároljuk a jelszóhash-eket?</strong><br>
+                <em>V:</em> A `/etc/passwd` fájlt minden felhasználónak és folyamatnak olvasnia kell tudni a nevek és UID-k feloldásához (jogosultság: 644). Ha a hash-ek ott lennének, bárki kinyerhetné azokat és offline szótártámadással feltörhetné a jelszavakat. A `/etc/shadow` csak root által olvasható (600), így a hash-ek védve vannak.</p>
+                <p><strong>K: Mit jelent a Só (Salt) a jelszótárolásnál?</strong><br>
+                <em>V:</em> A Salt egy véletlenszerű adat, amelyet a jelszóhoz kevernek a hash-képzés előtt. Ennek köszönhetően ha két felhasználónak pontosan ugyanaz is a jelszava, a `/etc/shadow`-ban tárolt hash-ük teljesen eltérő lesz, megakadályozva a Rainbow Table alapú feltörést.</p>
+            </div>
+        </div>
+
+        <!-- I/11. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-11">
+            <h2>I/11. Tétel: Felhasználó- és csoportkezelő parancsok, lehetőségek</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>Felhasználókezelő parancsok: `useradd`, `usermod`, `userdel`.</li>
+                    <li>Jelszó- és lejáratkezelés: `passwd`, `chage`.</li>
+                    <li>Csoportkezelő parancsok: `groupadd`, `groupmod`, `groupdel`.</li>
+                    <li>Jogosultság-váltási lehetőségek: `su` vs. `sudo` (a `/etc/sudoers` szerepe).</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Felhasználók adminisztrációja</h4>
+            <ul>
+                <li><code>useradd</code>: Új felhasználói fiók létrehozása.
+                    <ul>
+                        <li><code>useradd -m -s /bin/bash -g szerkesztok -G sudo,docker tamas</code>
+                            <br><code>-m</code>: Létrehozza a Home könyvtárat (`/home/tamas`), feltöltve a `/etc/skel` sablonjaival.
+                            <br><code>-s</code>: Megadja az alapértelmezett shellt.
+                            <br><code>-g</code>: Megadja az elsődleges (primér) csoportot.
+                            <br><code>-G</code>: Megadja a kiegészítő (másodlagos) csoportok vesszővel elválasztott listáját.
+                        </li>
+                    </ul>
+                </li>
+                <li><code>usermod</code>: Meglévő felhasználó tulajdonságainak módosítása.
+                    <ul>
+                        <li><code>usermod -aG docker tamas</code>: Hozzáadja a felhasználót a `docker` csoportoz (**KRITIKUS: a `-a` append kapcsoló kell, különben felülírja a többi csoportot!**).</li>
+                        <li><code>usermod -L tamas</code>: Zárolja a fiókot (Lock).</li>
+                        <li><code>usermod -U tamas</code>: Feloldja a fiók zárolását (Unlock).</li>
+                        <li><code>usermod -s /bin/zsh tamas</code>: Megváltoztatja a shellt.</li>
+                    </ul>
+                </li>
+                <li><code>userdel</code>: Felhasználó törlése.
+                    <ul>
+                        <li><code>userdel tamas</code>: Törli a felhasználót a `/etc/passwd`-ből, de a Home könyvtára megmarad.</li>
+                        <li><code>userdel -r tamas</code>: Törli a felhasználót ÉS a Home könyvtárát, valamint a leveleit is.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>2. Jelszó- és házirend-kezelés</h4>
+            <ul>
+                <li><code>passwd</code>: Jelszó megváltoztatása.
+                    <ul>
+                        <li><code>passwd</code>: Saját jelszó módosítása.</li>
+                        <li><code>sudo passwd tamas</code>: Rootként más felhasználó jelszavának beállítása (a régi jelszó ismerete nélkül).</li>
+                        <li><code>sudo passwd -l tamas</code> / <code>-u tamas</code>: Zárolás / Feloldás.</li>
+                    </ul>
+                </li>
+                <li><code>chage</code> (Change age): Jelszólejárati adatok módosítása.
+                    <ul>
+                        <li><code>chage -l tamas</code>: Kiírja a felhasználó jelszólejárati beállításait.</li>
+                        <li><code>chage -M 90 tamas</code>: A jelszó legfeljebb 90 napig érvényes.</li>
+                        <li><code>chage -d 0 tamas</code>: Azonnali jelszómódosítást kényszerít ki a következő bejelentkezéskor.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>3. Csoportok adminisztrációja</h4>
+            <ul>
+                <li><code>groupadd fejlesztok</code>: Új csoport létrehozása.</li>
+                <li><code>groupmod -n devops fejlesztok</code>: Csoport átnevezése.</li>
+                <li><code>groupdel fejlesztok</code>: Csoport törlése.</li>
+                <li><code>gpasswd -a tamas fejlesztok</code>: Felhasználó hozzáadása csoporthoz.</li>
+            </ul>
+
+            <h4>4. Jogosultságváltás: `su` vs. `sudo`</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Szempont</th>
+                        <th><code>su</code> (Substitute User)</th>
+                        <th><code>sudo</code> (Superuser Do)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Hitelesítés</strong></td>
+                        <td>A **CÉL FELHASZNÁLÓ (pl. root) jelszavát** kell megadni.</td>
+                        <td>A **SAJÁT FELHASZNÁLÓ jelszavát** kell megadni.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Működés</strong></td>
+                        <td><code>su -</code> : Átvált root-ra, betöltve a root teljes környezetét (`PATH`, Home).</td>
+                        <td><code>sudo parancs</code> : Egyetlen parancsot futtat root joggal.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Biztonság és Audit</strong></td>
+                        <td>Kevésbé biztonságos (ki kell adni a root jelszót). Nincs részletes parancsszintű audit log.</td>
+                        <td>Nagyon biztonságos. A `/etc/sudoers` fájlban finomhangolható (`visudo`), és minden parancsfuttatást naplóz a `/var/log/auth.log`-ba.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Miért veszélyes a `usermod -G csoport user` parancs a `-a` kapcsoló nélkül?</strong><br>
+                <em>V:</em> A `-a` (append) kapcsoló nélkül a `usermod -G` felülírja a felhasználó összes eddigi kiegészítő csoport tagságát a megadott egyetlen csoportra, így a felhasználó kiszorulhat a korábbi csoportjaiból (pl. kikerülhet a `sudo` vagy `docker` csoportból).</p>
+                <p><strong>K: Mivel kell szerkeszteni a `/etc/sudoers` fájlt és miért?**<br>
+                <em>V:</em> A `/etc/sudoers` fájlt kizárólag a **`visudo`** paranccsal szabad szerkeszteni. A `visudo` mentés előtt szintaktikai ellenőrzést végez, megakadályozva, hogy egy elgépelt szintaktikai hiba miatt a rendszerben senki se tudjon többet `sudo`-zni.</p>
+            </div>
+        </div>
+
+        <!-- I/12. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-12">
+            <h2>I/12. Tétel: A POSIX ACL-ek felépítése, bejegyzései, jelentősége</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A POSIX ACL (Access Control List) fogalma és a korlátozott UGO modell meghaladása.</li>
+                    <li>Az ACL bejegyzéstípusok (User, Named User, Group, Named Group, Mask, Other).</li>
+                    <li>A Maszk (Mask) szerepe, működése és felülbírálási mechanizmusa.</li>
+                    <li>ACL lekérdező és beállító parancsok (`getfacl`, `setfacl`) és a Default ACL.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A POSIX ACL jelentősége</h4>
+            <p>A hagyományos Unix DAC (UGO) jogosultsági modell korlátja, hogy egy fájlhoz **kizárólag egyetlen tulajdonos és egyetlen csoport** rendelhető. Ha egy fájlt 3 különböző csoportnak vagy 5 egyedi felhasználónak kellene eltérő jogokkal elérhetővé tenni, a hagyományos rendszer csődöt mond.</p>
+
+            <p>A **POSIX ACL (Access Control List)** kiterjeszti az Inode metaadatait, és lehetővé teszi, hogy tetszőleges számú egyedi felhasználóhoz (`u:név:jog`) és csoporthoz (`g:név:jog`) rendelhessünk egyedi olvasási, írási és futtatási jogosultságokat.</p>
+
+            <h4>2. ACL Bejegyzéstípusok</h4>
+            <p>Az <code>ls -l</code> parancs kimenetében a jogosultságsor végén látható <strong><code>+</code> jel</strong> (pl. <code>rw-rwxr--+</code>) jelzi, hogy a fájlon POSIX ACL van beállítva. A <code>getfacl fájl</code> parancs írja ki a bejegyzéseket:</p>
+
+            <pre>
+# file: projekt.doc
+# owner: tamas
+# group: dev
+user::rw-
+user:anna:rwx          # Nevesített felhasználó (Named User)
+group::r--
+group:testers:r-x      # Nevesített csoport (Named Group)
+mask::rwx              # A MASZK (Mask)
+other::---
+            </pre>
+
+            <ul>
+                <li><code>user::rwx</code> : A fájl tulajdonosának joga (Base user).</li>
+                <li><code>user:anna:rwx</code> : Egyedi nevesített felhasználó (`anna`) joga (Named user).</li>
+                <li><code>group::r--</code> : A fájl elsődleges csoportjának joga (Base group).</li>
+                <li><code>group:testers:r-x</code> : Egyedi nevesített csoport (`testers`) joga (Named group).</li>
+                <li><code>mask::rwx</code> : A Maszk bejegyzés.</li>
+                <li><code>other::---</code> : Egyéb felhasználók joga (Base other).</li>
+            </ul>
+
+            <h4>3. A MASZK (Mask) kiértékelési szerepe</h4>
+            <p><strong>KRITIKUS VIZSGAPONT: Mi a Maszk szerepe a POSIX ACL-ben?</strong></p>
+            <p>A **Maszk (`mask::`)** meghatározza az **összes nevesített felhasználó (Named user), nevesített csoport (Named group) és a tulajdonosi csoport (Base group) által elérhető MAXIMÁLIS érvényes jogosultságot**.</p>
+
+            <p>A ténylegesen érvényesített jog a beállított jog és a maszk **bitenkénti ÉS (AND) kapcsolata**:</p>
+            <ul>
+                <li>Ha `user:anna:rwx` van beállítva, de a maszk `mask::r-x` (nincs írási jog a maszkban), akkor Anna **NEM fog tudni írni** a fájlba! Az érvényes joga `r-x` lesz.</li>
+                <li>A maszk automatikusan újraszámolódik a `chmod` vagy `setfacl` futtatásakor, de kézzel is korlátozható (`setfacl -m m::r-x fájl`).</li>
+            </ul>
+
+            <h4>4. ACL Kezelő parancsok és a Default ACL</h4>
+            <ul>
+                <li><code>getfacl fájl.txt</code>: Az ACL bejegyzések lekérdezése.</li>
+                <li><code>setfacl -m u:anna:rwx fájl.txt</code>: Nevesített felhasználó jogának hozzáadása/módosítása.</li>
+                <li><code>setfacl -m g:testers:rx fájl.txt</code>: Nevesített csoport jogának megadása.</li>
+                <li><code>setfacl -x u:anna fájl.txt</code>: Anna egyedi ACL bejegyzésének törlése.</li>
+                <li><code>setfacl -b fájl.txt</code>: Az **összes kiterjesztett ACL bejegyzés törlése** (visszaáll UGO modellre).</li>
+                <li><strong>Default ACL (Alapértelmezett ACL könyvtárakon):** Könyvtárakra beállítható `default:` előtaggal. A könyvtárban újonnan létrejövő fájlok és alkönyvtárak automatikusan örökölni fogják ezeket a bejegyzéseket.
+                    <br><em>Példa:</em> <code>setfacl -m d:u:anna:rwx /shared_dir</code></li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a Maszk (`mask`) szerepe a POSIX ACL kiértékelésénél?</strong><br>
+                <em>V:</em> A Maszk kijelöli a maximális plafont a nevesített felhasználók, a nevesített csoportok és a tulajdonosi csoport jogosultságaira. Ha a maszkból hiányzik egy jog (pl. írás), akkor azt a beállított egyedi ACL jog ellenére sem kaphatja meg az adott felhasználó vagy csoport.</p>
+                <p><strong>K: Mire szolgál a Default ACL egy könyvtáron?</strong><br>
+                <em>V:</em> A Default ACL határozza meg azokat a jogosultsági bejegyzéseket, amelyeket a könyvtárban a jövőben létrehozott új fájlok és alkönyvtárak automatikusan megörökölnek a keletkezésük pillanatában.</p>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

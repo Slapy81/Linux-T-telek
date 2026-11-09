@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Vizsgatételek - 1. Rész (I/1 - I/4)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --text: #1f2937;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-text: #38bdf8;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .tetel-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #2563eb;
+            margin-top: 24px;
+        }
+        h4 {
+            color: #0d9488;
+            margin-top: 18px;
+        }
+        ul, ol {
+            padding-left: 24px;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+        .vazlat-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-light);
+            padding: 14px;
+            margin: 16px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 14px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-title {
+            font-weight: bold;
+            color: #15803d;
+            margin-bottom: 8px;
+        }
+        @media print {
+            body { background-color: #fff; padding: 0; }
+            .tetel-card { box-shadow: none; border: none; padding: 0; margin-bottom: 60px; page-break-after: always; }
+            pre { white-space: pre-wrap; word-break: break-all; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Linux Operációs Rendszerek - Szóbeli Vizsgatételek<br><small style="font-size:0.6em; font-weight:normal;">1. Rész: I/1. – I/4. Tételek (Teljes, vágatlan kiadás)</small></h1>
+
+        <!-- I/1. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-1">
+            <h2>I/1. Tétel: Unix története, kialakulása, fontosabb fejlődési ágak, verziók, koncepciók</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A Unix története és kialakulása: MULTICS projekt kudarcától a PDP-7-es prototípusig (1969, AT&T Bell Labs).</li>
+                    <li>A C programozási nyelv megalkotása és a kernel újraírása (1972-1973): a hordozhatóság forradalma.</li>
+                    <li>Fejlődési ágak és szabványosítás: BSD (Berkeley) vs. System V (AT&T) és a POSIX szabvány megszületése.</li>
+                    <li>A Unix-filozófia 4 alapelve (Doug McIlroy).</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A Unix története és a C nyelv szerepe</h4>
+            <p>A Unix története 1969-ben kezdődött az AT&T Bell Labs kutatóintézetében. A kezdeti előlépcső a MULTICS (Multiplexed Information and Computing Service) projekt volt, amely egy komplex, sokfelhasználós operációs rendszert célzott meg, de a projekt túl bonyolulttá és lassúvá vált, így az AT&T visszalépett tőle.</p>
+            <p>Ezt követően <strong>Ken Thompson</strong>, <strong>Dennis Ritchie</strong>, Douglas McIlroy és Joe Ossanna egy kisebb, rugalmasabb rendszert kezdtek el fejleszteni egy félretett PDP-7-es számítógépen. Az új rendszert tréfásan UNICS-nak (Uniplexed Information and Computing Service) nevezték el, amely később <strong>Unix</strong> néven vált ismertté.</p>
+            <p><strong>A fordulópont (1972–1973):</strong> A korai Unix még assembly nyelven íródott, ami szorosan a PDP hardverhez kötötte. Dennis Ritchie kifejlesztette a <strong>C programozási nyelvet</strong> (a B nyelv utódjaként), és 1973-ban a Unix kernelt szinte teljes egészében újraírták C nyelven. Ez volt az informatika történetének egyik legjelentősebb áttörése: a Unix lett az első olyan operációs rendszer, amely <strong>magasszintű nyelven íródott, így hordozhatóvá (portable) vált</strong> különböző hardverarchitektúrák között.</p>
+
+            <h4>2. Fejlődési ágak: BSD vs. System V</h4>
+            <p>Az AT&T-t egy korábbi trösztellenes megállapodás eltiltotta a szoftverértékesítéstől, így a Unix forráskódját jelképes összegért elérhetővé tette egyetemek és kutatóhelyek számára. Ez két fő fejlődési ág kiválási folyamatához vezetett:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Szempont</th>
+                        <th>BSD (Berkeley Software Distribution)</th>
+                        <th>System V (AT&T)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Származás</strong></td>
+                        <td>Kaliforniai Egyetem, Berkeley (Bill Joy és csapata).</td>
+                        <td>AT&T kereskedelmi kiadása (System V Release 4 - SVR4).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Főbb újítások</strong></td>
+                        <td>Virtuális memóriakezelés (Paging), TCP/IP hálózati stack, vi szerkesztő, C shell (csh), fast file system (FFS).</td>
+                        <td>SysV init rendszer (runlevel-ek), IPC struktúrák (Shared Memory, Semaphores, Message Queues).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mai utódok</strong></td>
+                        <td>FreeBSD, OpenBSD, NetBSD, macOS (Darwin kernel).</td>
+                        <td>Solaris (Sun), AIX (IBM), HP-UX.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>POSIX (Portable Operating System Interface):** A különvált fejlődési ágak miatti kompatibilitási problémák áthidalására az IEEE megalkotta a **POSIX szabványt** (IEEE 1003). Ez egy olyan egységes API felületet és rendszerhívási készletet határoz meg, amely garantálja, hogy a POSIX-kompatibilis forráskód módosítás nélkül lefordítható és futtatható legyen bármely Unix-szerű rendszeren.</p>
+
+            <h4>3. A Unix-filozófia 4 alapelve (Doug McIlroy)</h4>
+            <p>A Unix sikerének és időtállóságának kulcsa a tiszta tervezési elvekben rejlik:</p>
+            <ol>
+                <li><strong>Kis programok elve:</strong> Írj olyan kis programokat, amelyek egyetlen dolgot csinálnak, de azt jól! (Do one thing and do it well).</li>
+                <li><strong>Összedolgozás elve:</strong> A programok kimenete legyen képes más programok bemeneteként szolgálni. Ennek technikai alapja a csővezeték (Pipe - <code>|</code>).</li>
+                <li><strong>Szöveges felület elve:</strong> A programok kimenete és bemenete legyen egyszerű szöveges adatfolyam (text stream), mert a szöveg a leguniverzálisabb interfész.</li>
+                <li><strong>„Mindent fájlként kezelni” elve (Everything is a file):</strong> A lemezes fájlok mellett a hardvereszközök, billentyűzet, képernyő, hálózati socketek és könyvtárak mind egységes fájlrendszer-interfészen és file descriptorokon keresztül érhetők el.</li>
+            </ol>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi volt a C nyelv szerepe a Unix elterjedésében?</strong><br>
+                <em>V:</em> A C nyelv megalkotásával a Unix kernelt újra tudták írni magasszintű nyelven. Ez tette a Unixot az első hordozható operációs rendszerré, amelyet nem kellett minden új hardverarchitektúrára assembly-ben újraírni, elegendő volt a C fordítót elkészíteni az adott gépre.</p>
+                <p><strong>K: Mi a POSIX szabvány fő célja?</strong><br>
+                <em>V:</em> A POSIX célja a Unix-szerű operációs rendszerek közötti hordozhatóság (portabilitás) biztosítása a rendszerhívások, C könyvtári függvények és shell eszközök egységesítésével.</p>
+            </div>
+        </div>
+
+        <!-- I/2. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-2">
+            <h2>I/2. Tétel: A szabad szoftver mozgalom, GNU kiáltvány, szabad szoftver licencek</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A Szabad Szoftver Mozgalom gyökerei és a GNU Projekt elindítása (Richard Stallman, 1983).</li>
+                    <li>A 4 alapvető szabadságfok (Freedom 0, 1, 2, 3).</li>
+                    <li>Szoftverlicencek csoportosítása: Copyleft (GPL) vs. Permisszív (MIT, BSD, Apache).</li>
+                    <li>Nyílt forráskód (Open Source) vs. Szabad Szoftver (Free Software) filozófiai különbsége.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A Mozgalom és a GNU Projekt</h4>
+            <p>Az 1970-es évek végén a szoftvergyártók elkezdték lezárni a forráskódokat és tulajdonosi (proprietary) licenceket alkalmazni. <strong>Richard M. Stallman (RMS)</strong>, az MIT Mesterséges Intelligencia Laboratóriumának kutatója ez ellen fellépve 1983-ban közzétette a <strong>GNU Kiáltványt (GNU Manifesto)</strong>, és elindította a <strong>GNU Projektet</strong> (GNU's Not Unix).</p>
+            <p>A projekt célja egy teljesen szabad, Unix-kompatibilis operációs rendszer megalkotása volt. 1985-ben megalapította a <strong>FSF-et (Free Software Foundation)</strong>. A GNU projekt elkészítette az operációs rendszerhez szükséges alapvető szoftverláncot (GCC fordító, GDB nyomkövető, Emmet/Emacs, Bash, GNU Coreutils), de a saját rendszermagjuk (GNU Hurd) lassan fejlődött.</p>
+
+            <h4>2. A 4 alapvető szabadságfok (Free Software Definition)</h4>
+            <p>Egy szoftver akkor minősül szabad szoftvernek, ha a felhasználó megkapja a következő 4 alapvető szabadságjogot:</p>
+
+            <pre>
++-----------------------------------------------------------------------+
+|                       A 4 ALAPVETŐ SZABAD SÁGFOK                      |
++-----------------------------------------------------------------------+
+| Freedom 0 | A program tetszőleges célra való FUTTATÁSÁNAK szabadsága.|
++-----------+-----------------------------------------------------------+
+| Freedom 1 | A program működésének TANULMÁNYOZÁSA ÉS MÓDOSÍTÁSA       |
+|           | (Feltétele: Hozzáférés a FORRÁSKÓDHOZ).                   |
++-----------+-----------------------------------------------------------+
+| Freedom 2 | A program másolatainak TERJESZTÉSE, továbbadása.          |
++-----------+-----------------------------------------------------------+
+| Freedom 3 | A MÓDOSÍTOTT VÁLTOZATOK TERJESZTÉSE és közzététele        |
+|           | a teljes közösség számára.                                |
++-----------------------------------------------------------------------+
+            </pre>
+
+            <h4>3. Szoftverlicencek csoportosítása</h4>
+            <p>A szabad szoftverek világában a licencek a forráskód újrafelhasználásának feltételei alapján két nagy kategóriára oszlanak:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tulajdonság</th>
+                        <th>Copyleft (Védő) Licencek</th>
+                        <th>Permisszív (Engedékeny) Licencek</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Filozófia</strong></td>
+                        <td>Garantálja, hogy a szoftver és annak minden származtatott változata örökre szabad marad.</td>
+                        <td>Maximális szabadságot ad a fejlesztőnek, akár a forráskód lezárását is megengedve.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Feltétel</strong></td>
+                        <td>Ha módosítod és terjeszted a kódot, a módosított változatot is <strong>ugyanaz alatt a Copyleft licenc alatt kell közzétenned</strong> (virális hatás).</td>
+                        <td>A kód szabadon felhasználható, módosítható, és akár zárt forráskódú kereskedelmi szoftverbe is beépíthető a szerzői jogi nyilatkozat megtartásával.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Példák</strong></td>
+                        <td><strong>GPL v2 / v3</strong> (GNU General Public License), <strong>LGPL</strong> (Lesser GPL - könyvtárakhoz), <strong>AGPL</strong> (Affero GPL - hálózati/cloud szoftverekhez).</td>
+                        <td><strong>MIT Licenc</strong>, <strong>BSD Licenc</strong> (2-clause / 3-clause), <strong>Apache 2.0 Licenc</strong>.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a különbség a GPL és az MIT licenc között?</strong><br>
+                <em>V:</em> A GPL egy Copyleft licenc: ha a kód alapján új szoftvert terjesztesz, kötelező annak forráskódját is GPL alatt közzétenni. Az MIT egy permisszív licenc: megengedi, hogy a kódot zárt forráskódú, kereskedelmi termékbe építsd be anélkül, hogy közzé kellene tenned a saját forráskódodat.</p>
+                <p><strong>K: Mi a Freedom 1 feltétele?</strong><br>
+                <em>V:</em> A Freedom 1 (a program tanulmányozásának és módosításának szabadsága) elengedhetetlen feltétele a forráskódhoz (source code) való teljes hozzáférés.</p>
+            </div>
+        </div>
+
+        <!-- I/3. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-3">
+            <h2>I/3. Tétel: Linux kialakulása, előzményei, legfontosabb általános és technikai jellemzői</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A Linux megszületése: Linus Torvalds és az 1991-es bejelentés (MINIX vs. Linux).</li>
+                    <li>A GNU/Linux szimbiózis: a rendszermag és a rendszereszközök találkozása.</li>
+                    <li>Általános jellemzők: Multi-user, Multi-tasking, Portabilitás.</li>
+                    <li>Technikai jellemzők: Monolitikus de moduláris kernel, VFS réteg, Virtuális memóriakezelés.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A Linux megszületése és az 1991-es előzmények</h4>
+            <p>1991-ben a finn <strong>Linus Torvalds</strong>, a Helsinki Egyetem hallgatója elégedetlen volt a tanulmányaihoz használt MINIX operációs rendszerrel (Andrew Tanenbaum oktatási célú rendszere), amely korlátozott volt és nem használta ki az új Intel 80386-os processzor védett módját és taszk-váltási képességeit.</p>
+
+            <p>Linus egy saját terminál-emulátor és feladatkezelő fejlesztésébe kezdett C nyelven. 1991. augusztus 25-én tette közzé híres üzenetét a <code>comp.os.minix</code> hírcsoportban, jelezve, hogy egy szabad operációs rendszert ír 386-os PC-re "csak hobbiként, nem lesz olyan nagy és professzionális, mint a gnu".</p>
+
+            <p><strong>A GNU/Linux szimbiózis:</strong> Linus elkészítette a <strong>Linux Kernelt</strong> (a rendszermagot), de hiányoztak a felhasználói eszközök (shell, fordítók, parancsok). A FSF GNU projektje pedig elkészítette az összes felhasználói eszközt, de hiányzott a stabil kernelt (GNU Hurd). A két projekt összekapcsolásával, és a Linux kernel <strong>GPL v2</strong> licenc alá helyezésével létrejött a teljes, működőképes <strong>GNU/Linux operációs rendszer</strong>.</p>
+
+            <h4>2. Általános és technikai jellemzők</h4>
+
+            <pre>
++-----------------------------------------------------------------------+
+|                    A LINUX TECHNIKAI ARCHITEKTÚRÁJA                   |
++-----------------------------------------------------------------------+
+| FELHASZNÁLÓI TÉR | Shell (Bash), Grafikus Felület (X11/Wayland),     |
+| (User Space)     | Alkalmazások (Firefox, Server daemons)             |
++------------------+----------------------------------------------------+
+| RENDSZERHÍVÁSOK  | System Call Interface (POSIX system calls)         |
++------------------+----------------------------------------------------+
+| KERNEL TÉR       | Process Scheduler | Memory Manager | VFS           |
+| (Kernel Space)   | Network Stack     | Device Drivers | IPC           |
++------------------+----------------------------------------------------+
+| HARDVER          | CPU, RAM, HDD/SSD, NIC, GPU                        |
++-----------------------------------------------------------------------+
+            </pre>
+
+            <ul>
+                <li><strong>Többfelhasználós működés (Multi-user):** Több felhasználó tud egyidejűleg bejelentkezni és folyamatokat futtatni a rendszeren úgy, hogy a jogosultsági rendszer szigorúan elszigeteli a saját fájljaikat és folyamataikat.</li>
+                <li><strong>Preemptív többfeledatos működés (Preemptive Multitasking):** A kernel ütemezője (scheduler) osztja el a CPU-időt a folyamatok között, és joga van bármelyik folyamat futását felfüggeszteni a prioritások alapján (ellentétben a kooperatív multitaskinggal).</li>
+                <li><strong>Monolitikus, de Moduláris Kernel Architecture:**
+                    <ul>
+                        <li><em>Monolitikus:</em> A teljes kernel (memóriakezelés, ütemező, hálózati stack, eszközvezérlők) egyetlen nagy védett memóriacímterületen (Kernel Space - Ring 0) fut a maximális teljesítmény érdekében.</li>
+                        <li><em>Moduláris:</em> A **Betölthető Kernel Modulok (LKM - Loadable Kernel Modules)** segítségével a kernel futás közben, újraindítás nélkül képes új eszközvezérlőket vagy fájlrendszer-drivereket betölteni a memóriába.</li>
+                    </ul>
+                </li>
+                <li><strong>Virtuális Memóriakezelés (Paging):** Minden folyamat saját virtuális címtérrel rendelkezik. A lapozási mechanizmus 4 KB-os memórialapokat használt, és engedélyezi a Swap lemezterület használatát a RAM fizikai bővítésére.</li>
+                <li><strong>Virtuális Állományrendszer (VFS - Virtual File System):** Egy absztrakciós réteg a kernelben, amely egységes interfészt biztosít a felhasználói programok felé az összes támogatott fájlrendszer (Ext4, XFS, Btrfs, NFS, FAT32) kezelésére.</li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a különbség a monolitikus és a mikrokernel architektúra között, és melyiket használja a Linux?</strong><br>
+                <em>V:</em> A monolitikus kernelben minden alrendszer egyetlen közös kernel memóriacímterületen fut (gyors, de egy hibás driver leránthatja az egész rendszert). A mikrokernelben csak a legalapvetőbb funkciók futnak a magban, a driverek és fájlrendszerek usermode folyamatok (biztonságosabb, de lassabb). A Linux **monolitikus, de moduláris** kernelt használ.</p>
+                <p><strong>K: Miért helyes szakmailag a GNU/Linux megnevezés?</strong><br>
+                <em>V:</em> Mert maga a "Linux" csak a rendszermagot (kernelt) jelöli. A teljes, használható operációs rendszerhez a GNU projekt által kifejlesztett rendszereszközök, C könyvtárak (`glibc`) és héj-programok (Bash) szükségesek.</p>
+            </div>
+        </div>
+
+        <!-- I/4. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-4">
+            <h2>I/4. Tétel: A Linux fájlrendszerei, csoportosításuk, általános jellemzőik</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A fájlrendszer fogalma és a POSIX hierarchia (VFS és FHS).</li>
+                    <li>Fájlrendszerek csoportosítása: Natív lemezes, Fejlett/Kötetkezelős, Hordozható (nem natív), Hálózati és Virtuális.</li>
+                    <li>A Naplózás (Journaling) működési elve és típusai.</li>
+                    <li>FHS (Filesystem Hierarchy Standard) alapvető könyvtárszerkezete.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Fájlrendszerek csoportosítása Linux alatt</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kategória</th>
+                        <th>Fájlrendszer típusok</th>
+                        <th>Jellemzők és használati terület</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Hagyományos Natív Lemezes</strong></td>
+                        <td>Ext2, Ext3, <strong>Ext4</strong>, XFS</td>
+                        <td>Sztenderd Linux fájlrendszerek. Az Ext4 a legelterjedtebb általános célú fájlrendszer. Az XFS nagy fájlok és szerverek alapértelmezettje (RHEL).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fejlett / Kötetkezelős</strong></td>
+                        <td><strong>Btrfs</strong>, ZFS</td>
+                        <td>Copy-on-Write (CoW) működés. Támogatják a pillanatképeket (Snapshot), beépített szoftveres RAID-et, tömörítést és az online méretezést.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nem Natív (Hordozható)</strong></td>
+                        <td>FAT16, FAT32, exFAT, NTFS</td>
+                        <td>Windows/macOS kompatibilitásra használt lemezek, pendrive-ok. A Linux kernel `ntfs3` vagy FUSE driveren keresztül kezeli.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hálózati Fájlrendszerek</strong></td>
+                        <td>NFS, Samba / CIFS, GlusterFS</td>
+                        <td>Hálózaton keresztüli távoli fájlelérés. Az NFS natív Unix/Linux, a Samba Windows interoperabilitáshoz való.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Virtuális (Pseudo) Fájlrendszerek</strong></td>
+                        <td><code>/proc</code>, <code>/sys</code>, <code>/dev</code>, <code>tmpfs</code></td>
+                        <td>Nem lemezen tárolódnak, hanem a kernel hozza létre őket a RAM-ban az állapotok, hardverek és folyamatok elérésére.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>2. A Naplózás (Journaling) működési elve</h4>
+            <p>A hagyományos fájlrendszerekben (pl. Ext2) ha egy írási művelet közben váratlan áramkimaradás történt, a metaadatok és az adatblokkok nincsenek szinkronban. A rendszer újraindításkor a teljes lemezt átvizsgáló <code>fsck</code> (filesystem check) futtatását igényelte, ami órákig is eltarthatott.</p>
+
+            <p>A **naplózó fájlrendszerek (Ext3, Ext4, XFS)** egy különleges lemezterületet, a **Journal**-t tartanak fent. A módosítási művelet 3 fázisból áll:</p>
+            <ol>
+                <li><strong>Journal Write:</strong> A kernel előre felírja a tervezett módosításokat (metaadatokat és/vagy adatot) a Journal területre.</li>
+                <li><strong>Commit:</strong> A tranzakció lezárása a naplóban.</li>
+                <li><strong>Checkpointing:</strong> A kernel kiírja a tényleges módosításokat a fájlrendszer igazi adatstruktúráiba (Inode tábla, adatblokkok).</li>
+            </ol>
+            <p>Ha áramkimaradás történik, a rendszer újraindításkor csak a Journal utolsó lezáratlan tranzakcióit olvassa vissza (Replay), így a fájlrendszer **másodpercek alatt konzisztens állapotba kerül**.</p>
+
+            <h4>3. A Linux könyvtárhierarchia szabvány (FHS - Filesystem Hierarchy Standard)</h4>
+            <p>A Linux rendszereken egyetlen egybefüggő gyökérből (<code>/</code>) indul ki a könyvtárfa:</p>
+            <ul>
+                <li><code>/bin</code> és <code>/sbin</code>: Alapvető rendszervégrehajtható binárisok (modern rendszereken a <code>/usr/bin</code>-re linkelve).</li>
+                <li><code>/boot</code>: A rendszerindításhoz szükséges fájlok (vmlinuz kernel, initramfs, GRUB konfiguráció).</li>
+                <li><code>/dev</code>: Eszközfájlok (Block és Character device-ok, pl. <code>/dev/sda</code>, <code>/dev/null</code>).</li>
+                <li><code>/etc</code>: Rendszerszintű szöveges konfigurációs fájlok.</li>
+                <li><code>/home</code>: A felhasználók egyéni saját könyvtárai.</li>
+                <li><code>/lib</code> / <code>/lib64</code>: A binárisok működéséhez szükséges megosztott C könyvtárak (<code>.so</code>).</li>
+                <li><code>/mnt</code> és <code>/media</code>: Csatolási pontok cserélhető adathordozókhoz és ideiglenes lemezekhez.</li>
+                <li><code>/proc</code>: Virtuális fájlrendszer a futó folyamatokról és a kernel paramétereiről.</li>
+                <li><code>/sys</code>: Virtuális fájlrendszer a felismerte hardvereszközökről és buszokról.</li>
+                <li><code>/tmp</code>: Ideiglenes fájlok tárolója (mindenki írhatja, gyakran <code>tmpfs</code> RAM-diszk).</li>
+                <li><code>/usr</code>: Felhasználói programok, könyvtárak és dokumentációk (User System Resources).</li>
+                <li><code>/var</code>: Változó méretű adatok (log fájlok: <code>/var/log</code>, adatbázisok, levelezés, webgyökér).</li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a különbség az Ext2 és az Ext4 fájlrendszerek között?</strong><br>
+                <em>V:</em> Az Ext2 nem naplózó fájlrendszer, míg az Ext4 modern naplózó (journaling) fájlrendszer, amely extenseket (Extents) használ az blokk-alokációhoz, nagyobb fájl- és partíció-méreteket támogat, és ellenállóbb a sérülésekkel szemben.</p>
+                <p><strong>K: Mire szolgál a <code>/proc</code> könyvtár?</strong><br>
+                <em>V:</em> A <code>/proc</code> egy virtuális (RAM-ban lévő) fájlrendszer, amely a kernel állapotáról, a hardvereszközökről és a futó folyamatokról (PID alapú könyvtárakban) nyújt valós idejű információt szöveges fájlokként.</p>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

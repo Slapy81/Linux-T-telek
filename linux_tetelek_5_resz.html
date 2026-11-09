@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Vizsgatételek - 5. Rész (II/1 - II/4)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --text: #1f2937;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-text: #38bdf8;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .tetel-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #2563eb;
+            margin-top: 24px;
+        }
+        h4 {
+            color: #0d9488;
+            margin-top: 18px;
+        }
+        ul, ol {
+            padding-left: 24px;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+        .vazlat-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-light);
+            padding: 14px;
+            margin: 16px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 14px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-title {
+            font-weight: bold;
+            color: #15803d;
+            margin-bottom: 8px;
+        }
+        @media print {
+            body { background-color: #fff; padding: 0; }
+            .tetel-card { box-shadow: none; border: none; padding: 0; margin-bottom: 60px; page-break-after: always; }
+            pre { white-space: pre-wrap; word-break: break-all; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Linux Operációs Rendszerek - Szóbeli Vizsgatételek<br><small style="font-size:0.6em; font-weight:normal;">5. Rész: II/1. – II/4. Tételek (Teljes, vágatlan kiadás)</small></h1>
+
+        <!-- II/1. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-1">
+            <h2>II/1. Tétel: Reguláris kifejezések fajtái, műveletei, speciális karakterei</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A Reguláris Kifejezés (RegEx) fogalma és szerepe a szövegelemzésben.</li>
+                    <li>POSIX RegEx fajták: BRE (Basic) vs. ERE (Extended) vs. PCRE (Perl Compatible).</li>
+                    <li>Speciális metakarakterek, horgonyok, kvantorok és karakterosztályok.</li>
+                    <li>Gyakorlati parancsok használata (`grep`, `sed`, `awk`).</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A Reguláris Kifejezés fogalma</h4>
+            <p>A **reguláris kifejezés (Regular Expression / RegEx)** egy formalizált szabályok szerint felépített karaktersorozat (minta), amely szöveges adatokban keresendő alakzatokat ír le. A Linux rendszerekben a RegEx a keresés, szűrés, adatkinyerés és szövegmódosítás alapvető eszköze.</p>
+
+            <h4>2. POSIX RegEx fajták összehasonlítása</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tulajdonság</th>
+                        <th>BRE (Basic Regular Expression)</th>
+                        <th>ERE (Extended Regular Expression)</th>
+                        <th>PCRE (Perl Compatible RE)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Metakarakter szintaxis</strong></td>
+                        <td>A metakarakterek többsége alapesetben sima karakter, csak **visszaperrel (`\`) eszképelve** válnak metakarakterré (<code>\+</code>, <code>\?</code>, <code>\{</code>, <code>\(</code>, <code>\|</code>).</td>
+                        <td>A metakarakterek **alapértelmezetten metakarakterek** (<code>+</code>, <code>?</code>, <code>{</code>, <code>(</code>, <code>|</code>). Visszaperrel jelöljük a szó szerinti karaktert.</td>
+                        <td>Minden ERE elem + speciális osztályok (<code>\d</code> szám, <code>\w</code> szó, <code>\s</code> szóköz) és előre/hátra tekintő illesztések (lookahead/lookbehind).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ezközök</strong></td>
+                        <td>Hagyományos <code>grep</code>, <code>sed</code>, <code>ed</code>, <code>vi</code>.</td>
+                        <td><code>grep -E</code> (egrep), <code>sed -E</code>, <code>awk</code>.</td>
+                        <td><code>grep -P</code>, <code>perl</code>, Python.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>3. Speciális Karakterek és Műveletek gyűjteménye</h4>
+
+            <ul>
+                <li><strong>Karakteres illesztők:</strong>
+                    <ul>
+                        <li><code>.</code> (Pont): Bármilyen **egyetlen** karakterre illeszkedik (kivéve újsor).</li>
+                        <li><code>[...]</code> : Karakterosztály. Bármelyik zárójelbeli karakterre illeszkedik.</li>
+                        <li><code>[^...]</code> : Negált karakterosztály. Bármelyik karakterre illeszkedik, ami nincs a zárójelben.</li>
+                        <li>POSIX osztályok: <code>[:alnum:]</code>, <code>[:alpha:]</code>, <code>[:digit:]</code>, <code>[:space:]</code>, <code>[:upper:]</code>, <code>[:lower:]</code>.</li>
+                    </ul>
+                </li>
+                <li><strong>Horgonyok (Anchors — Szövegpozíció kényszerítése):</strong>
+                    <ul>
+                        <li><code>^</code> (Kalap): **Sor eleje** illesztés (pl. <code>^root</code> = a sor root-tal kezdődik).</li>
+                        <li><code>$</code> (Dollár): **Sor vége** illesztés (pl. <code>bash$</code> = a sor bash-re végződik).</li>
+                        <li><code>^$</code> : **Teljesen üres sor**.</li>
+                        <li><code>\b</code> : Szóhatár illesztés.</li>
+                    </ul>
+                </li>
+                <li><strong>Kvantorok (Ismétlődések száma — ERE szintaxis):</strong>
+                    <ul>
+                        <li><code>*</code> : Az előtte álló elem **0 vagy többször** ismétlődhet.</li>
+                        <li><code>+</code> : Az előtte álló elem **legalább 1-szer vagy többször** ismétlődik.</li>
+                        <li><code>?</code> : Az előtte álló elem **0-szor vagy 1-szer** fordul elő (opcionális).</li>
+                        <li><code>{n}</code> : Pontosan `n` alkalommal ismétlődik.</li>
+                        <li><code>{n,m}</code> : `n` és `m` közötti alkalommal ismétlődik.</li>
+                    </ul>
+                </li>
+                <li><strong>Vagylagosság és Csoportosítás (ERE):</strong>
+                    <ul>
+                        <li><code>|</code> : VAGY kapcsolat (pl. <code>cat|dog</code>).</li>
+                        <li><code>(...)</code> : Csoportosítás (pl. <code>(error|warning):</code>).</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a különbség a BRE és az ERE szintaxisa között?</strong><br>
+                <em>V:</em> BRE-ben a `+`, `?`, `{`, `}`, `(`, `)` és `|` karakterek szó szerint értelmezendők, és csak visszaperrel (`\+`, `\|`) válnak metakarakterré. ERE-ben ezek alapértelmezetten metakarakterek.</p>
+                <p><strong>K: Mit jelent a `grep -E '^[0-9]+' file.txt` parancs?</strong><br>
+                <em>V:</em> Az ERE szintaxis segítségével megkeresi és kiírja azokat a sorokat a `file.txt`-ből, amelyek a sor legelején (`^`) legalább egy vagy több számjeggyel (`[0-9]+`) kezdeményeződnek.</p>
+            </div>
+        </div>
+
+        <!-- II/2. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-2">
+            <h2>II/2. Tétel: A Linux kernel feladatai, működési modellje, alrendszerei, külső bővítményei</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A kernel szerepe, a Kernel Space (Ring 0) vs. User Space (Ring 3) elszigeteltség.</li>
+                    <li>A Rendszerhívások (System Calls / Syscalls) mint átjáró felület.</li>
+                    <li>Monolitikus, de moduláris architektúra.</li>
+                    <li>Az 5 fő kernel-alrendszer feladatai.</li>
+                    <li>Betölthető Kernel Modulok (LKM) és a modulkezelő parancsok.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Védelmi szintek és a Rendszerhívási felület</h4>
+            <p>A hardver architektúra (pl. x86_64) által biztosított védelmi gyűrűket (Privilege Rings) a Linux kernel két tartományra osztja:</p>
+
+            <pre>
++-----------------------------------------------------------------------+
+| USER SPACE (Ring 3)   | Felhasználói alkalmazások (Firefox, Bash)      |
+|                       | Korlátozott memóriacímzés és utasításkészlet. |
++-----------------------+-----------------------------------------------+
+|                       |  RENDSZERHÍVÁSI INTERFÉSZ (System Call API)   |
+|                       |  (read, write, fork, execve, socket, open)    |
++-----------------------+-----------------------------------------------+
+| KERNEL SPACE (Ring 0) | Linux Kernel (Scheduler, VFS, Memory, Net)    |
+|                       | Korlátlan hozzáférés a hardverhez és RAM-hoz. |
++-----------------------------------------------------------------------+
+            </pre>
+
+            <ul>
+                <li><strong>Kernel Space (Ring 0):** Privilégizált működési mód, ahol a mag fut. Korlátlan hozzáférése van a CPU utasításokhoz, a fizikai RAM-hoz és az I/O eszközökhöz.</li>
+                <li><strong>User Space (Ring 3):** Védett működési mód a felhasználói programoknak. Nem érhetik el közvetlenül a hardvert vagy más folyamatok memóriáját.</li>
+                <li><strong>System Calls (Rendszerhívások):** A védett átjáró a User Space és a Kernel Space között. Amikor egy alkalmazás fájlt akar olvasni (`read`), memóriát kér (`brk`/`mmap`) vagy hálózaton küld adatot (`send`), szoftveres megszakítással system call-t kezdeményez a kernel felé.</li>
+            </ul>
+
+            <h4>2. Az 5 fő kernel-alrendszer</h4>
+            <ol>
+                <li><strong>Process Scheduler (Folyamatütemező):** Felelős a CPU-idő elosztásáért a futó folyamatok között (CFS algoritmus).</li>
+                <li><strong>Memory Manager (Memóriakezelő):** Kezeli a virtuális memóriacímzést, a 4 KB-os lapozást (Paging), a memóriafoglalásokat és a Swap lemezterületet.</li>
+                <li><strong>Virtual File System (VFS):** Egységes POSIX fájlkezelési felületet biztosít a felhasználói alkalmazások felé az eltérő fizikai fájlrendszerek felett.</li>
+                <li><strong>Network Stack (Hálózati alrendszer):** Megvalósítja a TCP/IP protokollkészletet, a socketkezelést és a Netfilter csomagszűrő keretrendszert.</li>
+                <li><strong>IPC (Inter-Process Communication) alrendszer:** Biztosítja a folyamatok közötti kommunikációt (Shared memory, Semaphores, Pipes, Sockets).</li>
+            </ol>
+
+            <h4>3. Betölthető Kernel Modulok (LKM - Loadable Kernel Modules)</h4>
+            <p>Bár a Linux **monolitikus kernel** (minden alrendszer egyetlen memóriatartományban fut), **moduláris szerkezetű**: a kód jelentős része (eszközvezérlők, fájlrendszer-driverek, tűzfalszabályok) különálló `.ko` (Kernel Object) fájlokba van kiszervezve, amelyek **futás közben, a rendszer újraindítása nélkül** tölthetők be vagy távolíthatók el.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parancs</th>
+                        <th>Működése és feladata</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>lsmod</code></td>
+                        <td>Kilistázza a memóriába jelenleg betöltött kernel modulokat (a <code>/proc/modules</code> fájlból olvas).</td>
+                    </tr>
+                    <tr>
+                        <td><code>modprobe modul_név</code></td>
+                        <td>**Intelligens modulbetöltés.** Betölti a modult ÉS annak **összes függőségét** a <code>/lib/modules/$(uname -r)/</code> könyvtárból.</td>
+                    </tr>
+                    <tr>
+                        <td><code>modprobe -r modul_név</code></td>
+                        <td>Eltávolítja a modult a memóriából (ha nem használja semmi).</td>
+                    </tr>
+                    <tr>
+                        <td><code>modinfo modul_név</code></td>
+                        <td>Részletes adatokat ír ki a modulról (szerző, licenc, paraméterek, függőségek).</td>
+                    </tr>
+                    <tr>
+                        <td><code>insmod</code> / <code>rmmod</code></td>
+                        <td>Alacsony szintű modul betöltés/eltávolítás közvetlen fájl-útvonal alapján (függőségkezelés **NÉLKÜL**).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Miért mondjuk, hogy a Linux monolitikus, de moduláris kernel?</strong><br>
+                <em>V:</em> Monolitikus, mert a teljes rendszermag egyetlen közös kernel memóriacímterületen (Ring 0) fut a maximális sebességért. Moduláris, mert a Betölthető Kernel Modulok (LKM) segítségével futás közben, újraindítás nélkül tölthetők be és távolíthatók el a driverek.</p>
+                <p><strong>K: Mi a különbség az `insmod` és a `modprobe` parancsok között?</strong><br>
+                <em>V:</em> Az `insmod` egy alacsony szintű eszköz, amely csak a megadott egyetlen `.ko` fájlt tudja betölteni, és hibát ad, ha hiányzik egy függőség. A `modprobe` egy magas szintű eszköz, amely automatikusan felderíti és betölti a modul működéséhez szükséges összes függőséget is.</p>
+            </div>
+        </div>
+
+        <!-- II/3. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-3">
+            <h2>II/3. Tétel: A Linux kernel verziószámozása, támogatott architektúrák, kernelfordítás</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A kernel verziószámozási sémája (`A.B.C`) és a kiadási típusok (LTS vs. Stable).</li>
+                    <li>Legfontosabb támogatott hardverarchitektúrák.</li>
+                    <li>A kernelfordítás lépései és parancsai legelejétől a GRUB frissítésig.</li>
+                    <li>Az `initramfs` (initial RAM disk) szerepe a boot folyamatban.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A Kernel verziószámozási sémája (`A.B.C`)</h4>
+            <p>Linus Torvalds és a törzsfejlesztők a következő verziószámozási sémát használják:</p>
+            <ul>
+                <li><strong>`A` (Major version):** Főverzió (pl. Linux 5, Linux 6). Akkor léptetik, ha a Minor verziók száma eléri a ~20-at.</li>
+                <li><strong>`B` (Minor / Patch level):** Fő kiadási verzió (~9-10 hetente jelenik meg új funkciókkal és illesztőkkel).</li>
+                <li><strong>`C` (Sub-patch / Sub-level):** Biztonsági javítások és hibajavítások az adott kiadáshoz (pl. 6.8.2).</li>
+            </ul>
+
+            <p><strong>Kiadási ágak:</strong> Mainline (fejlesztői RC kiadások), Stable (stabil kiadások) és **LTS (Long Term Support)**. Az LTS verziókat 2–6 évig tartják karban biztonsági javításokkal (szerver disztribúciók alapja).</p>
+
+            <h4>2. Támogatott Architektúrák</h4>
+            <p>A Linux a világ leghordozhatóbb rendszermagja. Támogatott architektúrák: <strong>`x86_64` / `amd64`</strong> (PC/Szerver), <strong>`arm64` / `aarch64`</strong> (Mobiltelefonok, Raspberry Pi, ARM szerverek), <strong>`riscv64`</strong> (Nyílt utasításkészletű CPU-k), <strong>`s390x`</strong> (IBM Mainframe), <strong>`ppc64le`</strong> (IBM PowerPC).</p>
+
+            <h4>3. A Kernelfordítás pontos lépéssorozata</h4>
+
+            <pre>
+1. Forráskód letöltése és kitömörítése a /usr/src/ könyvtárba
+2. make mrproper            --> Megtisztítja a forráskódfát a korábbi fordítások maradványaitól
+3. make menuconfig          --> Grafikus/TUI menüben beállítja a .config fájlt (driverek kiválasztása)
+4. make -j$(nproc)          --> A kernel (vmlinuz) és a modulok párhuzamos lefordítása az összes CPU magon
+5. sudo make modules_install--> Másolja a lefordított modulokat ide: /lib/modules/KERNEL_VERZIÓ/
+6. sudo make install        --> Másolja a vmlinuz-t és a System.map-et a /boot könyvtárba
+7. sudo update-initramfs -c -k KERNEL_VERZIÓ --> Elkészíti az új initramfs képmást
+8. sudo update-grub         --> Frissíti a GRUB2 rendszertöltő menüjét
+            </pre>
+
+            <h4>4. Az Initramfs (Initial RAM File System) szerepe</h4>
+            <p>A kernelfordítás után létrehozott <code>initramfs</code> egy tömörített **ideiglenes gyökérfájlrendszer képmás**, amit a GRUB betölt a RAM-ba a kernel mellé. Szerepe: tartalmazza azokat a lemezvezérlő modulokat (pl. NVMe, RAID, LVM, Ext4), amelyek elengedhetetlenek a fizikai gyökérfájlrendszer (<code>/</code>) felcsatolásához.</p>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a szerepe a `make menuconfig` parancsnak a kernelfordításkor?</strong><br>
+                <em>V:</em> Egy ncurses alapú menüt jelenít meg, ahol a fejlesztő kiválaszthatja, hogy mely kernel-funkciók és driverek épüljenek be közvetlenül a kernelbe (`*`), melyek készüljenek betölthető modulként (`M`), és melyek hagyódjanak ki teljesen, létrehozva a `.config` állományt.</p>
+                <p><strong>K: Miért van szükség az `initramfs` fájlra a boot folyamat során?</strong><br>
+                <em>V:</em> Mert a kernelnek a boot elején még nincs hozzáférése a fizikai lemezen lévő gyökérfájlrendszerhez (`/`). Az `initramfs` a RAM-ban biztosítja a lemezvezérlő drivereket és az alapszerszámokat a valódi lemez csatolásáig.</p>
+            </div>
+        </div>
+
+        <!-- II/4. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-4">
+            <h2>II/4. Tétel: A Linux alatti folyamatok általános jellemzői, csoportosítása</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A folyamat (Process) fogalma vs. Program (lemezfájl).</li>
+                    <li>Folyamat-azonosítók és attribútumok (PID, PPID, UID, GID).</li>
+                    <li>Folyamatok létrehozása: a `fork()` és `execve()` rendszerhívási pár.</li>
+                    <li>A 5 alapvető folyamatállapot (R, S, D, T, Z).</li>
+                    <li>Folyamatok csoportosítása (Interaktív, Batch, Daemon, Foreground, Background).</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A Folyamat (Process) fogalma és azonosítói</h4>
+            <p>A **program** egy lemezen tárolott passzív végrehajtható fájl. A **folyamat (process)** a memóriába betöltött, végrehajtás alatt álló aktív program, amely CPU-idővel, saját virtuális címtartománnyal, megnyitott fájlleírókkal és jogosultsági attribútumokkal rendelkezik.</p>
+
+            <ul>
+                <li><strong>PID (Process ID):** Egyedi számazonosító (1-től 4194304-ig). Az 1-es PID a `systemd` (vagy SysV init).</li>
+                <li><strong>PPID (Parent Process ID):** A szülőfolyamat azonosítója, amely létrehozta ezt a folyamatot.</li>
+                <li><strong>UID / GID (Real vs. Effective):**
+                    <ul>
+                        <li><em>Real UID/GID:</em> A folyamatot elindító valódi felhasználó/csoport azonosítója.</li>
+                        <li><em>Effective UID/GID:</em> A folyamat **tényleges jogosultságait** meghatározó azonosító (SUID/SGID futtatásakor eltér a Real UID-tól!).</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>2. Folyamatok létrehozása: `fork()` és `execve()`</h4>
+            <p>Linux alatt új folyamat kizárólag a **`fork()`** és **`execve()`** rendszerhívási pár segítségével jöhet létre:</p>
+            <ol>
+                <li><strong>`fork()`:** A szülőfolyamat **pontos másolatot** hoz létre önmagáról a memóriában (gyermekfolyamat). A gyermek új PID-et kap, de örökli a szülő memóriáját (Copy-on-Write) és megnyitott fájljait.</li>
+                <li><strong>`execve()`:** A gyermekfolyamat a másolt memóriacímterületét **felülírja az új program bináris kódjával** és elindítja azt.</li>
+            </ol>
+
+            <h4>3. A 5 alapvető Folyamatállapot (Process States)</h4>
+            <p>A <code>ps aux</code> vagy <code>top</code> parancsok <code>STAT</code> oszlopában látható kódok:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kód</th>
+                        <th>Állapot neve</th>
+                        <th>Részletes leírás és jellemzők</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>R</code></td>
+                        <td><strong>Running / Runnable</strong></td>
+                        <td>A folyamat **éppen a CPU-n fut**, vagy futásra kész állapotban várakozik az ütemező soraiban (Run queue).</td>
+                    </tr>
+                    <tr>
+                        <td><code>S</code></td>
+                        <td><strong>Interruptible Sleep</strong></td>
+                        <td>Megszakítható alvó állapot. A folyamat valamilyen eseményre vagy I/O-ra vár. **Szignálokkal (pl. `SIGKILL`) bármikor felébreszthető vagy leállítható.**</td>
+                    </tr>
+                    <tr>
+                        <td><code>D</code></td>
+                        <td><strong>Uninterruptible Sleep</strong></td>
+                        <td>**Nem megszakítható alvó állapot.** A folyamat közvetlen hardveres I/O műveletre (pl. lemezírásra) vár. **NEM LEHET szignálokkal (`kill -9`-cel sem!) leállítani**, amíg a hardver válasza meg nem érkezik!</td>
+                    </tr>
+                    <tr>
+                        <td><code>T</code></td>
+                        <td><strong>Stopped / Traced</strong></td>
+                        <td>A folyamat futása fel van függesztve szignál által (pl. `SIGSTOP`, `Ctrl+Z`) vagy nyomkövető által (GDB / `ptrace`).</td>
+                    </tr>
+                    <tr>
+                        <td><code>Z</code></td>
+                        <td><strong>Zombie (Zombi)</strong></td>
+                        <td>**Befejeződött folyamat.** A folyamat már lefutott és feladta a memóriáját, DE a szülőfolyamata még nem olvasta ki a kilépési kódját a `wait()` rendszerhívással. Önmaga memóriát nem fogyaszt, de foglalja a PID-t!</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>4. Folyamatok csoportosítása</h4>
+            <ul>
+                <li><strong>Interaktív folyamatok:</strong> Terminálhoz kötöttek, bemenetet várnak a felhasználótól (pl. `bash`, `nano`).</li>
+                <li><strong>Kötegelt (Batch) folyamatok:</strong> Terminál nélkül, ütemezetten futnak a háttérben (pl. cron jobok).</li>
+                <li><strong>Démonok (Daemons):** Háttérben futó rendszerszolgáltatások. Nincs irányító termináljuk (tty = `?`), a név végén konvenció szerint `d` áll (pl. `sshd`, `systemd`).</li>
+                <li><strong>Foreground (Előtér) vs. Background (Háttér):** Az előtérben futó folyamat lefoglalja a terminált. A háttérben futó parancs végére `&` jelet teszünk (pl. `cp bigfile /tmp/ &`), így a shell azonnal visszaadja a parancssort.</li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi az a Zombi folyamat és hogyan szüntethető meg?</strong><br>
+                <em>V:</em> A zombi egy már lefutott folyamat, amelynek a szülője még nem kérte le a kilépési státuszát (`wait()`). Magát a zombi folyamatot nem lehet `kill -9`-cel leállítani (mert már halott). A megszüntetéséhez a **szülőfolyamatnak kell szignált küldeni (`SIGHUP` vagy `SIGKILL`)**, vagy ha a szülő leáll, az 1-es PID-ű `systemd` örökbe fogadja és azonnal letakarítja.</p>
+                <p><strong>K: Mi a különbség az `S` és a `D` alvó állapotok között?</strong><br>
+                <em>V:</em> Az `S` (Interruptible sleep) felébreszthető szignálokkal. A `D` (Uninterruptible sleep) hardveres I/O-ra vár, és a kernel védi: semmilyen szignál (`SIGKILL` sem) nem tudja megszakítani, amíg az I/O művelet be nem fejeződik.</p>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

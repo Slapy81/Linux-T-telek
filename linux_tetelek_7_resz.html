@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Vizsgatételek - 7. Rész (II/9 - II/12)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --text: #1f2937;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-text: #38bdf8;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .tetel-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #2563eb;
+            margin-top: 24px;
+        }
+        h4 {
+            color: #0d9488;
+            margin-top: 18px;
+        }
+        ul, ol {
+            padding-left: 24px;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+        .vazlat-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-light);
+            padding: 14px;
+            margin: 16px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 14px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-title {
+            font-weight: bold;
+            color: #15803d;
+            margin-bottom: 8px;
+        }
+        @media print {
+            body { background-color: #fff; padding: 0; }
+            .tetel-card { box-shadow: none; border: none; padding: 0; margin-bottom: 60px; page-break-after: always; }
+            pre { white-space: pre-wrap; word-break: break-all; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Linux Operációs Rendszerek - Szóbeli Vizsgatételek<br><small style="font-size:0.6em; font-weight:normal;">7. Rész: II/9. – II/12. Tételek (Teljes, vágatlan kiadás)</small></h1>
+
+        <!-- II/9. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-9">
+            <h2>II/9. Tétel: A rendszerindulás feltételei, lépcsői</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A bootfolyamat 5 egymásra épülő szakasza (Firmware $\rightarrow$ Bootloader $\rightarrow$ Kernel $\rightarrow$ Initramfs $\rightarrow$ Systemd).</li>
+                    <li>BIOS/MBR vs. UEFI/GPT indítási különbségek.</li>
+                    <li>A `systemd` (PID 1) indítása és a Target-ek szerepe.</li>
+                    <li>A hagyományos SysVinit Runlevel-ek megfeleltetése a modern systemd Target-eknek.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A Bootfolyamat 5 szakasza</h4>
+
+            <pre>
++-----------------------------------------------------------------------+
+| 1. FIRMWARE    | BIOS (POST teszt, MBR olvasás) vagy                 |
+| (POST)         | UEFI (ESP partíció olvasása, Secure Boot).            |
++----------------+------------------------------------------------------+
+| 2. BOOTLOADER  | GRUB2 betöltődik, megjeleníti a menüt, betölti a    |
+| (GRUB2)        | vmlinuz kernelt és az initramfs képmást a RAM-ba.    |
++----------------+------------------------------------------------------+
+| 3. KERNEL      | A vmlinuz kibontja magát, inicializálja a CPU-t,     |
+|                | RAM-ot és a hardvereket, majd elindítja a VFS-t.     |
++----------------+------------------------------------------------------+
+| 4. INITRAMFS   | Ideiglenes RAM-diszk lemezvezérlő driverekkel a      |
+|                | fizikai gyökér (/) lemez felcsatolásához.            |
++----------------+------------------------------------------------------+
+| 5. SYSTEMD     | Elindul az 1-es PID-ű systemd folyamat, párhuzamosan  |
+| (PID 1)        | elindítja a szolgáltatásokat az alap Target-ig.      |
++-----------------------------------------------------------------------+
+            </pre>
+
+            <h4>2. Systemd Target-ek vs. Hagyományos SysVinit Runlevel-ek</h4>
+            <p>A modern `systemd` leváltotta a hagyományos szekvenciális SysVinit futási szinteket (Runlevels) függőség-alapú **Target-ekre**:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>SysVinit Runlevel</th>
+                        <th>Modern systemd Target</th>
+                        <th>Cél és működési mód</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Runlevel 0</td>
+                        <td><code>poweroff.target</code></td>
+                        <td>A rendszer teljes leállítása (Power off).</td>
+                    </tr>
+                    <tr>
+                        <td>Runlevel 1 / S</td>
+                        <td><code>rescue.target</code> (vagy <code>single-user.target</code>)</td>
+                        <td>Egyfelhasználós mentési mód (Single-user mode). Hálózat nélkül, root héjjal.</td>
+                    </tr>
+                    <tr>
+                        <td>Runlevel 3</td>
+                        <td><code>multi-user.target</code></td>
+                        <td>Többfelhasználós hálózati **konzolos / parancssori mód** (Szerverek alapértelmezettje!).</td>
+                    </tr>
+                    <tr>
+                        <td>Runlevel 5</td>
+                        <td><code>graphical.target</code></td>
+                        <td>Többfelhasználós **grafikus mód (GUI)** Display Managerrel (GDM/SDDM) és asztali környezettel.</td>
+                    </tr>
+                    <tr>
+                        <td>Runlevel 6</td>
+                        <td><code>reboot.target</code></td>
+                        <td>A rendszer újraindítása (Reboot).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a szerepe az 1-es PID-ű folyamatnak a Linuxban?</strong><br>
+                <em>V:</em> Az 1-es PID-ű folyamat (modern rendszereken a `systemd`) a rendszer legelső felhasználói folyamata. Felelős az összes szolgáltatás és démon elindításáért és felügyeletéért, valamint az elárvult (zombi) folyamatok örökbefogadásáért és eltakarításáért.</p>
+                <p><strong>K: Hogyan kérdezhető le és változtatható meg az alapértelmezett boot Target systemd alatt?</strong><br>
+                <em>V:</em> Lekérdezés: <code>systemctl get-default</code>. Megváltoztatás: <code>sudo systemctl set-default multi-user.target</code>.</p>
+            </div>
+        </div>
+
+        <!-- II/10. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-10">
+            <h2>II/10. Tétel: A GRUB működése, konfigurálási lehetőségei</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A GRUB2 (Grand Unified Bootloader) szerepe és fázisai (Stage 1, 1.5, 2 vs. UEFI ESP).</li>
+                    <li>Konfigurációs fájlok hierarchiája: `/boot/grub/grub.cfg` vs. `/etc/default/grub` vs. `/etc/grub.d/`.</li>
+                    <li>A GRUB konfiguráció frissítése (`update-grub`).</li>
+                    <li>Telepítés és mentési műveletek az interaktív GRUB parancssorból (`grub>`).</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A GRUB2 fázisai</h4>
+            <ul>
+                <li><strong>Hagyományos MBR/BIOS indításnál:**
+                    <ul>
+                        <li><em>Stage 1 (`boot.img`):</em> Az MBR első 446 bájtjában lévő apró kód, aminek egyetlen feladata a Stage 1.5 betöltése.</li>
+                        <li><em>Stage 1.5 (`core.img`):</em> Az MBR és az 1. partíció közötti üres szektorokban tárolódik. Tartalmazza az alapvető fájlrendszer-drivert.</li>
+                        <li><em>Stage 2:</em> A `/boot/grub/` könyvtárból betölti a teljes GRUB2 modult, beolvassa a konfigurációt és megjeleníti a mentüt.</li>
+                    </ul>
+                </li>
+                <li><strong>Modern UEFI indításnál:** Nincsenek Stage-ek. Az UEFI firmware közvetlenül beolvassa az ESP (EFI System Partition - FAT32) partícióról a `/EFI/BOOT/BOOTX64.EFI` binárist.</li>
+            </ul>
+
+            <h4>2. A GRUB2 konfigurációs struktúrája</h4>
+            <p><strong>KRITIKUS VIZSGAPONT: A `/boot/grub/grub.cfg` fájlt SOHA NEM SZABAD KÉZZEL SZERKESZTENI!</strong></p>
+
+            <ul>
+                <li><code>/etc/default/grub</code>: A rendszeradminisztrátor által szerkeszthető fő konfigurációs állomány.
+                    <ul>
+                        <li><code>GRUB_DEFAULT=0</code>: Alapértelmezett menüpont indexe.</li>
+                        <li><code>GRUB_TIMEOUT=5</code>: Várakozási idő másodpercben a menüben.</li>
+                        <li><code>GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"</code>: A kernelnek átadott indítási opciók.</li>
+                    </ul>
+                </li>
+                <li><code>/etc/grub.d/</code>: Generáló szkriptek könyvtára (`00_header`, `10_linux`, `40_custom`).</li>
+                <li><code>/boot/grub/grub.cfg</code>: A generált végleges konfigurációs fájl. A <code>sudo update-grub</code> (vagy <code>grub2-mkconfig -o /boot/grub/grub.cfg</code>) parancs hozza létre a `/etc/default/grub` és a `/etc/grub.d/` alapján.</li>
+            </ul>
+
+            <h4>3. Helyreállítás az interaktív GRUB parancssorból (`grub>`)</h4>
+            <p>Ha a rendszer nem tud bebootolni, a GRUB parancssorból kézzel is megadhatók az indítási paraméterek:</p>
+            <pre>
+grub> ls                                     # Partíciók kilistázása (pl. (hd0,gpt1))
+grub> set root=(hd0,gpt1)                     # Gyökérpartíció kijelölése
+grub> linux /boot/vmlinuz-6.8.0 root=/dev/sda1 # Kernel és root lemez megadása
+grub> initrd /boot/initrd.img-6.8.0          # Initramfs megadása
+grub> boot                                   # Indítás
+            </pre>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Melyik fájlt kell szerkeszteni a GRUB alapértelmezett várakozási idejének módosításához?</strong><br>
+                <em>V:</em> A **`/etc/default/grub`** fájlt kell szerkeszteni (a `GRUB_TIMEOUT` sor módosításával), majd le kell futtatni a `sudo update-grub` parancsot a módosítások érvényesítéséhez.</p>
+                <p><strong>K: Hogyan telepíthető újra a GRUB2 rendszertöltő az MBR-be/lemezre?</strong><br>
+                <em>V:</em> A `sudo grub-install /dev/sda` paranccsal.</p>
+            </div>
+        </div>
+
+        <!-- II/11. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-11">
+            <h2>II/11. Tétel: Szolgáltatások kezelése és automatikus indítása</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A `systemd` mint szolgáltatáskezelő (Service Manager).</li>
+                    <li>A Unit fájlok felépítése (`.service`) és a 3 fő szekció ([Unit], [Service], [Install]).</li>
+                    <li>Unit fájlok helye: `/lib/systemd/system/` vs. `/etc/systemd/system/`.</li>
+                    <li>A `systemctl` vezérlőparancs teljes eszköztára (futási állapot, boot engedélyezés, mask).</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A `systemd` `.service` Unit fájlok felépítése</h4>
+            <p>A `systemd`-ben minden szolgáltatást egy `.service` kiterjesztésű deklaratív konfigurációs fájl ír le (példa: `custom.service`):</p>
+
+            <pre>
+[Unit]
+Description=Saját Alkalmazás Szolgáltatás
+After=network.target syslog.target    # Csak a hálózat elindulása után indulhat
+Requires=postgresql.service           # Szoros függőség: ha a Postgres leáll, ez is leáll
+
+[Service]
+Type=simple                           # Indítási típus (simple, forking, oneshot, notify)
+ExecStart=/usr/local/bin/myapp        # Az elindítandó bináris abszolút útja
+ExecReload=/bin/kill -HUP $MAINPID    # Újratöltéskor lefutó parancs
+Restart=on-failure                    # Hiba esetén automatikusan újraindítja
+User=www-data                         # Milyen felhasználóként fusson
+
+[Install]
+WantedBy=multi-user.target            # Az 'enable' hatására ehhez a targethez linkelődik
+            </pre>
+
+            <h4>2. Unit fájlok könyvtár-hierarchiája</h4>
+            <ul>
+                <li><strong>`/lib/systemd/system/` (vagy `/usr/lib/...`):** A csomagkezelő (apt/dnf) által telepített gyári unit fájlok helye. **Kézzel módosítani tilos!**</li>
+                <li><strong>`/etc/systemd/system/`:** A rendszeradminisztrátor egyedi vagy felülbírált unit fájljainak helye. Az itt lévő fájlok **elsőbbséget élveznek** a gyári fájlokkal szemben!</li>
+            </ul>
+
+            <h4>3. Szolgáltatáskezelés a `systemctl` paranccsal</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parancs</th>
+                        <th>Funkció és működés</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>systemctl status ssh</code></td>
+                        <td>Megmutatja az `ssh` szolgáltatás állapotát (active/inactive, PID, memóriahasználat, utolsó logok).</td>
+                    </tr>
+                    <tr>
+                        <td><code>systemctl start ssh</code></td>
+                        <td>Azonnal elindítja a szolgáltatást az aktuális munkamenetben (a RAM-ban).</td>
+                    </tr>
+                    <tr>
+                        <td><code>systemctl stop ssh</code></td>
+                        <td>Leállítja a futó szolgáltatást.</td>
+                    </tr>
+                    <tr>
+                        <td><code>systemctl restart ssh</code></td>
+                        <td>Újraindítja a szolgáltatást (stop majd start).</td>
+                    </tr>
+                    <tr>
+                        <td><code>systemctl reload ssh</code></td>
+                        <td>Újraolvastatja a konfigurációt a szolgáltatással **leállítás nélkül** (SIGHUP).</td>
+                    </tr>
+                    <tr>
+                        <td><code>systemctl enable ssh</code></td>
+                        <td>**Engedélyezi az automatikus indítást** a következő boot során (szimbolikus linket hoz létre).</td>
+                    </tr>
+                    <tr>
+                        <td><code>systemctl disable ssh</code></td>
+                        <td>**Törli az automatikus boot indítást** (eltávolítja a szimbolikus linket).</td>
+                    </tr>
+                    <tr>
+                        <td><code>systemctl enable --now ssh</code></td>
+                        <td>**Egyetlen lépésben** engedélyezi a boot indítást ÉS azonnal el is indítja a szolgáltatást!</td>
+                    </tr>
+                    <tr>
+                        <td><code>systemctl mask ssh</code></td>
+                        <td>**Teljesen letiltja** a szolgáltatást (a `/dev/null`-ra linkeli), így kézzel vagy függőségként sem indítható el.</td>
+                    </tr>
+                    <tr>
+                        <td><code>systemctl daemon-reload</code></td>
+                        <td>Újraolvassa a `/etc/systemd/system/` könyvtár módosított unit fájljait.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a különbség a `systemctl start` és a `systemctl enable` parancsok között?</strong><br>
+                <em>V:</em> A `systemctl start` a szolgáltatást **azonnal elindítja az aktuális munkamenetben**, de a gép újraindítása után nem indul el. A `systemctl enable` a **jövőbeli boot folyamatokhoz** állítja be az automatikus indítást (szimbolikus linket hozva létre), de az aktuálisan futó állapotot nem változtatja meg.</p>
+                <p><strong>K: Mi a szerepe a `systemctl mask` parancsnak?</strong><br>
+                <em>V:</em> A `mask` a szolgáltatás unit fájlját a `/dev/null`-ra linkeli át, megakadályozva, hogy azt akár kézzel (`start`), akár egy másik szolgáltatás függőségeként el lehessen indítani.</p>
+            </div>
+        </div>
+
+        <!-- II/12. TÉTEL -->
+        <div class="tetel-card" id="tetel-ii-12">
+            <h2>II/12. Tétel: A hálózat működési feltételei, hálózati interfészek, konfigurálási és tesztelési parancsok</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A hálózati kommunikáció 4 alapvető feltétele.</li>
+                    <li>Interfész-elnevezési konvenciók (Hagyományos vs. Kiszámítható nevek: `eno1`, `enp3s0`).</li>
+                    <li>Konfigurálás: Modern `iproute2` (`ip`) vs. Hagyományos `net-tools` (`ifconfig`, `route`).</li>
+                    <li>Hálózatdiagnosztika és tesztelő parancsok (`ping`, `traceroute`, `ss -tulpn`, `dig`, `nc`).</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A Hálózati működés 4 alapvető feltétele</h4>
+            <ol>
+                <li><strong>Aktív Interfész (Link UP):** Működő hálózati kártya és kernel driver, amely aktív állapotban van.</li>
+                <li><strong>IP-cím és Alhálózati maszk:** Egyedi azonosító és a helyi alhálózat (Broadcast domain) határai.</li>
+                <li><strong>Alapértelmezett Átjáró (Default Gateway):** A helyi router IP-címe a távoli hálózatok eléréséhez.</li>
+                <li><strong>Névfeloldás (DNS Server):** DNS szerverek címei (pl. `/etc/resolv.conf`) a domain nevek IP-re fordításához.</li>
+            </ol>
+
+            <h4>2. Konfiguráció: Modern (`iproute2`) vs. Hagyományos (`net-tools`)</h4>
+            <p>A modern Linux disztribúciókban a `net-tools` csomag (`ifconfig`, `route`, `netstat`) elavult (`deprecated`). Helyette a **`iproute2`** csomag (`ip`, `ss`) a szabvány:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Művelet</th>
+                        <th>Modern `iproute2` parancs</th>
+                        <th>Hagyományos `net-tools` parancs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>IP-címek lekérdezése</strong></td>
+                        <td><code>ip addr show</code> (vagy <code>ip a</code>)</td>
+                        <td><code>ifconfig</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interfész be/kikapcsolás</strong></td>
+                        <td><code>ip link set dev enp3s0 up / down</code></td>
+                        <td><code>ifconfig enp3s0 up / down</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>IP-cím hozzáadása</strong></td>
+                        <td><code>ip addr add 192.168.1.50/24 dev enp3s0</code></td>
+                        <td><code>ifconfig enp3s0 192.168.1.50 netmask 255.255.255.0</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Útvonaltábla megtekintése</strong></td>
+                        <td><code>ip route show</code></td>
+                        <td><code>route -n</code> vagy <code>netstat -rn</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Default Gateway megadása</strong></td>
+                        <td><code>ip route add default via 192.168.1.1</code></td>
+                        <td><code>route add default gw 192.168.1.1</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>3. Hálózatdiagnosztikai parancsok</h4>
+            <ul>
+                <li><code>ping -c 4 8.8.8.8</code>: ICMP Echo kérések küldése az elérhetőség és válaszidő (RTT) tesztelésére.</li>
+                <li><code>traceroute google.com</code> / <code>tracepath google.com</code>: Megmutatja a köztes útválasztókat (hop-okat) a célállomásig.</li>
+                <li><code>mtr google.com</code>: Valós időben frissülő kombinált ping és traceroute diagnosztika.</li>
+                <li><strong>`ss -tulpn` (Socket Statistics - NAGYON GYAKORI VIZSGAPARANCS!):** Megmutatja a nyitott portokat.
+                    <ul>
+                        <li><code>-t</code>: TCP socketek, <code>-u</code>: UDP socketek, <code>-l</code>: Hallgatózó (Listening) portok, <code>-p</code>: Folyamat és PID kijelzése, <code>-n</code>: Numerikus IP és portszámok.</li>
+                    </ul>
+                </li>
+                <li><code>dig google.com</code> / <code>dig @8.8.8.8 google.com</code>: Részletes DNS lekérdezés a névfeloldás tesztelésére.</li>
+                <li><code>nc -zv 192.168.1.1 80</code> (Netcat): Teszteli, hogy a célgépen a 80-as TCP port nyitva van-e.</li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Melyik a 4 alapvető feltétel a hálózati kommunikációhoz?</strong><br>
+                <em>V:</em> 1. Működő interfész (`Link UP`), 2. Érvényes IP-cím és alhálózati maszk, 3. Alapértelmezett átjáró (Default Gateway), 4. Működő DNS szerver.</p>
+                <p><strong>K: Mit jelentenek a kapcsolók az `ss -tulpn` parancsban?</strong><br>
+                <em>V:</em> `-t`: TCP protokollok, `-u`: UDP protokollok, `-l`: hallgatózó (Listening) portok, `-p`: a portot lefoglaló folyamat neve és PID-je, `-n`: numerikus IP-címek és portszámok megjelenítése névfeloldás nélkül.</p>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

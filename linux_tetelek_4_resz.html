@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Vizsgatételek - 4. Rész (I/13 - I/16)</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --text: #1f2937;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-text: #38bdf8;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .tetel-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #2563eb;
+            margin-top: 24px;
+        }
+        h4 {
+            color: #0d9488;
+            margin-top: 18px;
+        }
+        ul, ol {
+            padding-left: 24px;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+        .vazlat-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-light);
+            padding: 14px;
+            margin: 16px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 14px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .qa-title {
+            font-weight: bold;
+            color: #15803d;
+            margin-bottom: 8px;
+        }
+        @media print {
+            body { background-color: #fff; padding: 0; }
+            .tetel-card { box-shadow: none; border: none; padding: 0; margin-bottom: 60px; page-break-after: always; }
+            pre { white-space: pre-wrap; word-break: break-all; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Linux Operációs Rendszerek - Szóbeli Vizsgatételek<br><small style="font-size:0.6em; font-weight:normal;">4. Rész: I/13. – I/16. Tételek (Teljes, vágatlan kiadás)</small></h1>
+
+        <!-- I/13. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-13">
+            <h2>I/13. Tétel: A bash behelyettesítései, speciális karakterei</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A Bash behelyettesítési sorrendje (7 szigorú lépés a kiértékelésnél).</li>
+                    <li>Változó- és parancs-behelyettesítés, aritmetikai kiértékelés.</li>
+                    <li>A Bash speciális beépített változói (`$?`, `$$`, `$!`, `$0`, `$1..$9`, `$#`, `$*`, `$@`).</li>
+                    <li>Mezőkre bontás (Word splitting) és az `$IFS` szerepe.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A Bash behelyettesítési sorrendje (Expansion Order)</h4>
+            <p>Amikor beírunk egy parancssort a Bash-be, a parancs futtatása **előtt** a héj szigorúan meghatározott sorrendben hajtja végre a behelyettesítéseket:</p>
+
+            <ol>
+                <li><strong>Brace Expansion (Kapcsos zárójel kifejtés):</strong> <code>a{b,c}</code> $\rightarrow$ <code>ab ac</code>, <code>file{1..3}</code> $\rightarrow$ <code>file1 file2 file3</code>.</li>
+                <li><strong>Tilde Expansion (Hullámvonal kifejtés):</strong> <code>~</code> $\rightarrow$ <code>/home/tamas</code>.</li>
+                <li><strong>Parameter and Variable Expansion (Változó kifejtés):</strong> <code>$VAR</code> vagy <code>${VAR}</code> értékének behelyettesítése.</li>
+                <li><strong>Command Substitution (Parancs-behelyettesítés):</strong> <code>$(parancs)</code> vagy <code>`parancs`</code> lefut, és a kimenete kerül a parancssorba (pl. <code>MAI_DATUMA=$(date +%Y-%m-%d)</code>).</li>
+                <li><strong>Arithmetic Expansion (Aritmetikai kifejtés):** <code>$((kifejezés))</code> kiértékelése (pl. <code>$((5 + 3))</code> $\rightarrow$ <code>8</code>).</li>
+                <li><strong>Word Splitting (Mezőkre bontás):** A behelyettesített szövegeket szavakra vágja a belső mezőelválasztó karakter (<code>$IFS</code> - Internal Field Separator, alapértelmezetten: szóköz, tabulátor, újsor) alapján.</li>
+                <li><strong>Pathname Expansion (Jokerkarakteres illesztés / Globbing):** A <code>*</code>, <code>?</code> és <code>[...]</code> minták illesztése a lemezen lévő valós fájlnevekre.</li>
+            </ol>
+
+            <h4>2. Speciális Bash változók gyűjteménye</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Változó</th>
+                        <th>Jelentése és használata</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>$?</code></td>
+                        <td>**AZ UTOLJÁRA LEFUTOTT PARANCS KILÉPÉSI KÓDJA (Exit status).**<br><code>0</code> = Sikeres végrehajtás. Nem nullás érték (<code>1..255</code>) = Hiba történt.</td>
+                    </tr>
+                    <tr>
+                        <td><code>$$</code></td>
+                        <td>Az **aktuálisan futó Shell folyamat PID-je** (Process ID). Ideiglenes fájlok egyedi elnevezésénél hasznos (pl. <code>/tmp/script_$$.log</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><code>$!</code></td>
+                        <td>Az **utoljára háttérben indított (<code>&</code>) folyamat PID-je**.</td>
+                    </tr>
+                    <tr>
+                        <td><code>$0</code></td>
+                        <td>A futtatott **szkript vagy shell neve** (pl. <code>./myscript.sh</code> vagy <code>/bin/bash</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><code>$1, $2, ... $9</code></td>
+                        <td>A szkriptnek átadott **1., 2., ... 9. pozicionális paraméter**. ($10 felett <code>${10}</code> alakban!).</td>
+                    </tr>
+                    <tr>
+                        <td><code>$#</code></td>
+                        <td>A szkriptnek átadott **pozicionális paraméterek száma**.</td>
+                    </tr>
+                    <tr>
+                        <td><code>$*</code></td>
+                        <td>Az összes átadott paraméter egyetlen egybefüggő sztringként, az <code>$IFS</code> első karakterével elválasztva (<code>"$1 $2 $3"</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><code>$@</code></td>
+                        <td>Az összes átadott paraméter külön-külön idézőjelbe tett elemlistaként (<code>"$1" "$2" "$3"</code> - ciklusokhoz ez a biztonságos!).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mit jelent a `echo $?` parancs kimenete?</strong><br>
+                <em>V:</em> Megmutatja az utoljára lefutott parancs kilépési állapotát (exit status). A `0` érték a sikeres lefutást jelzi, míg bármilyen 0-nál nagyobb szám valamilyen hibát jelent.</p>
+                <p><strong>K: Mi a különbség a `"$*"` és a `"$@"` között egy shell szkriptben?**<br>
+                <em>V:</em> Idézőjelek között a `"$*"` az összes átadott paramétert egyetlen hosszú szöveggé fűzi össze, míg a `"$@"` megtartja a paraméterek egyedi határait külön szavakként, így biztonságosan kezelhetők a szóközöket tartalmazó argumentumok a `for` ciklusokban.</p>
+            </div>
+        </div>
+
+        <!-- I/14. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-14">
+            <h2>I/14. Tétel: A shell szkript fogalma, értékadások, feltételvizsgálatok, feltételes utasítások</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A shell szkript fogalma, a Shebang (`#!/bin/bash`) szerepe és a futtatási jog.</li>
+                    <li>Változódeklaráció és értékadás szabályai (a szóköz tilalma!).</li>
+                    <li>Feltételvizsgálatok: POSIX `[ ]` (test) vs. kiterjesztett Bash `[[ ]]`.</li>
+                    <li>Feltételes szerkezetek: `if-elif-else-fi` és `case-esac`.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A Shell Szkript és a Shebang</h4>
+            <p>A **shell szkript** egy szöveges állomány, amely egymás után végrehajtandó parancsokat, változókat, feltételes szerkezeteket és ciklusokat tartalmaz. A szkript futtathatóságának 2 feltétele van:</p>
+            <ul>
+                <li><strong>Shebang (Interpreter kijelölés):** A fájl legelső sorában a <code>#!</code> karakterpárral megadott értelmező bináris abszolút útja (pl. <code>#!/bin/bash</code> vagy <code>#!/usr/bin/env bash</code>).</li>
+                <li><strong>Futtatási jog:** A fájlnak `x` futtatási joggal kell rendelkeznie (<code>chmod +x script.sh</code>).</li>
+            </ul>
+
+            <h4>2. Értékadás és Változókezelés</h4>
+            <p><strong>KRITIKUS HIBA: Az értékadásnál az egyenlőségjel (<code>=</code>) két oldalán NEM ÁLLHAT SZÓKÖZ!</strong></p>
+            <pre>
+# HELYES:
+NEV="Szónok Tamás"
+KOR=45
+
+# HELYTELEN (hibát ad!):
+NEV = "Szónok Tamás"   # A Bash a 'NEV' parancsot keresi!
+            </pre>
+
+            <h4>3. Feltételvizsgálatok (`[ ]` vs. `[[ ]]`)</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tulajdonság</th>
+                        <th>POSIX `[ ]` (test parancs)</th>
+                        <th>Kiterjesztett Bash `[[ ]]`</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Hordozhatóság</strong></td>
+                        <td>POSIX kompatibilis, minden Unix/Linux héj alatt működik.</td>
+                        <td>Bash, Zsh és Ksh kiterjesztés.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Logikai operátorok</strong></td>
+                        <td><code>-a</code> (ÉS), <code>-o</code> (VAGY).</td>
+                        <td><code>&&</code> (ÉS), <code>||</code> (VAGY).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mintaillesztés</strong></td>
+                        <td>Nincs.</td>
+                        <td>Támogatja a Joker-illesztést (<code>== *.txt</code>) és a **RegEx illesztést (<code>=~</code>)**.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Biztonság</strong></td>
+                        <td>Üres vagy szóközös változóknál szintaktikai hibával összeomolhat.</td>
+                        <td>Biztonságos, nem omlik össze idézőjel nélküli üres változónál sem.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Feltételvizsgálati operátorok:</h4>
+            <ul>
+                <li><strong>Számok összehasonlítása:</strong> <code>-eq</code> (equal), <code>-ne</code> (not equal), <code>-gt</code> (greater than), <code>-ge</code> (greater or equal), <code>-lt</code> (less than), <code>-le</code> (less or equal).</li>
+                <li><strong>Sztringek összehasonlítása:</strong> <code>=</code> vagy <code>==</code> (egyezik), <code>!=</code> (nem egyezik), <code>-z "$VAR"</code> (üres sztring), <code>-n "$VAR"</code> (nem üres sztring).</li>
+                <li><strong>Fájltesztek:</strong> <code>-f file</code> (létező rendes fájl), <code>-d dir</code> (létező könyvtár), <code>-e file</code> (létezik bármi ezen a néven), <code>-r</code>, <code>-w</code>, <code>-x</code> (olvasható, írható, futtatható), <code>-s file</code> (nem üres fájl).</li>
+            </ul>
+
+            <h4>4. Feltételes utasítások (`if` és `case`)</h4>
+
+            <pre>
+# If-Elif-Else szerkezet:
+if [[ -d "/var/log" ]]; then
+    echo "A /var/log könyvtár létezik."
+elif [[ -f "/var/log" ]]; then
+    echo "A /var/log egy fájl, nem könyvtár."
+else
+    echo "Nem létezik."
+fi
+
+# Case szerkezet (Mintaillesztéses választás):
+case "$1" in
+    start)
+        echo "Szolgáltatás indítása..."
+        ;;
+    stop)
+        echo "Szolgáltatás leállítása..."
+        ;;
+    restart|reload)
+        echo "Szolgáltatás újraindítása..."
+        ;;
+    *)
+        echo "Használat: $0 {start|stop|restart}"
+        exit 1
+        ;;
+esac
+            </pre>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Miért jobb a `[[ ]]` használata a `[ ]` helyett a Bash szkriptekben?</strong><br>
+                <em>V:</em> A `[[ ]]` a Bash kiterjesztett teszt szerkezete, amely biztonságosabb (nem omlik össze idézőjelet nem tartalmazó üres változóknál), támogatja a szándékolt `&&` és `||` logikai operátorokat, valamint a reguláris kifejezések illesztését (`=~`).</p>
+                <p><strong>K: Miért hibás az `A = 5` értékadás a Bash-ben?</strong><br>
+                <em>V:</em> Mert a Bash az egyenlőségjel körüli szóközök miatt az `A` szót végrehajtandó parancsként, az `=` és `5` szavakat pedig annak paramétereiként értelmezi.</p>
+            </div>
+        </div>
+
+        <!-- I/15. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-15">
+            <h2>I/15. Tétel: A bash ciklusai, függvényei, tömbjei</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>Ciklusszerkezetek: `for` (lista és C-stílusú), `while` és `until`.</li>
+                    <li>Vezérlő utasítások: `break` és `continue`.</li>
+                    <li>Függvények deklarálása, paraméterezése és a `local` változók szerepe.</li>
+                    <li>Tömbök használata: Indexelt és Asszociatív tömbök műveletei.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. Ciklusszerkezetek (`for`, `while`, `until`)</h4>
+
+            <pre>
+# 1. Lista-alapú For ciklus:
+for file in *.txt; do
+    echo "Fájl feldolgozása: $file"
+done
+
+# C-stílusú For ciklus:
+for (( i=0; i<5; i++ )); do
+    echo "Index: $i"
+done
+
+# 2. While ciklus (Amíg a feltétel IGAZ):
+count=1
+while [[ $count -le 5 ]]; do
+    echo "Count: $count"
+    ((count++))
+done
+
+# Fájl olvasása sorról sorra while ciklussal (NAGYON GYAKORI!):
+while IFS= read -r line; do
+    echo "Sor: $line"
+done < "/etc/hosts"
+
+# 3. Until ciklus (Amíg a feltétel HAMIS, azaz amíg IGAZZÁ nem válik):
+until ping -c 1 8.8.8.8 &>/dev/null; do
+    echo "Várakozás a hálózatra..."
+    sleep 2
+done
+            </pre>
+
+            <ul>
+                <li><code>break</code>: Azonnal kilép a legbelső ciklusból.</li>
+                <li><code>continue</code>: Átugorja a ciklus törzsének hátralévő részét, és a következő iterációra lép.</li>
+            </ul>
+
+            <h4>2. Függvények (Functions) a Bash-ben</h4>
+            <p>A függvények újrafelhasználható kódblokkok. Saját pozicionális paramétertömbbel (`$1`, `$2`, `$#`) rendelkeznek!</p>
+
+            <pre>
+# Függvény deklarációja:
+osszead() {
+    # Helyi változó használata (NAGYON FONTOS a mellékhatások ellen!):
+    local num1=$1
+    local num2=$2
+    local eredmeny=$((num1 + num2))
+    
+    echo "$eredmeny" # A függvény kimenete a standard outputra kerül
+    return 0        # A kilépési kód ($?)
+}
+
+# Függvény meghívása és kimenetének elkapása:
+VALAMI=$(osszead 15 25)
+echo "Eredmény: $VALAMI" # 40
+            </pre>
+
+            <h4>3. Tömbök (Arrays) a Bash-ben</h4>
+            <p>A Bash kétféle tömbtípust támogat: indexelt (számmal indexelt) és asszociatív (kulcs-érték páros) tömböket.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Művelet</th>
+                        <th>Indexelt tömb példa</th>
+                        <th>Asszociatív tömb példa (Kulcs-érték)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Deklaráció</strong></td>
+                        <td><code>GYUMOLCSOK=("alma" "körte" "szilva")</code></td>
+                        <td><code>declare -A KOROK</code> (Kötelező a `-A`!)<br><code>KOROK=(["tamas"]=45 ["anna"]=30)</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Elem elérése</strong></td>
+                        <td><code>echo "${GYUMOLCSOK[0]}"</code> (alma)</td>
+                        <td><code>echo "${KOROK["tamas"]}"</code> (45)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Összes elem</strong></td>
+                        <td><code>echo "${GYUMOLCSOK[@]}"</code></td>
+                        <td><code>echo "${KOROK[@]}"</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tömb hossza</strong></td>
+                        <td><code>echo "${#GYUMOLCSOK[@]}"</code> (3)</td>
+                        <td><code>echo "${#KOROK[@]}"</code> (2)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Elem hozzáadása</strong></td>
+                        <td><code>GYUMOLCSOK+=("barack")</code></td>
+                        <td><code>KOROK["bela"]=50</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Miért kritikus a `local` kulcsszó használata a függvényeken belüli változóknál?</strong><br>
+                <em>V:</em> A Bash-ben alapértelmezetten minden változó globális. A `local` kulcsszó nélkül a függvényben módosított változó felülírná a szkript többi részén használt azonos nevű globális változó értékét, nem kívánt mellékhatásokat okozva.</p>
+                <p><strong>K: Hogyan kell biztonságosan beolvasni egy szöveges fájlt sorról sorra a Bash-ben?</strong><br>
+                <em>V:</em> A `while IFS= read -r line; do ... done < fájl.txt` szerkezettel. Az `IFS=` megakadályozza a kezdő/záró szóközök levágását, a `-r` pedig megakadályozza a visszaper (escape) karakterek értelmezését.</p>
+            </div>
+        </div>
+
+        <!-- I/16. TÉTEL -->
+        <div class="tetel-card" id="tetel-i-16">
+            <h2>I/16. Tétel: A Linux I/O kezelése, az I/O átirányítás lehetőségei</h2>
+            
+            <div class="vazlat-box">
+                <strong>A felelet szerkezeti vázlata (Fejben tartható váz):</strong>
+                <ol>
+                    <li>A 3 alapértelmezett fájlleíró (File Descriptors: FD 0, FD 1, FD 2).</li>
+                    <li>Kimenet és Bemenet átirányító operátorok (`>`, `>>`, `<`, `2>`, `&>`).</li>
+                    <li>A Csővezeték (Pipe - `|`) és a `tee` parancs működése.</li>
+                    <li>Speciális I/O eszközök: `/dev/null` és `/dev/zero`.</li>
+                </ol>
+            </div>
+
+            <h3>Részletes kidolgozás</h3>
+
+            <h4>1. A 3 alapértelmezett fájlleíró (File Descriptors)</h4>
+            <p>Minden Linux alatt elinduló folyamat automatikusan megnyit 3 alapértelmezett adatcsatornát (fájlleírót):</p>
+
+            <pre>
++-----------------------------------------------------------------------+
+|                              FOLYAMAT                                 |
++-----------------------------------------------------------------------+
+| FD 0 (stdin)  <──  Standard Input   (Alapértelmezés: Billentyűzet)   |
+| FD 1 (stdout) ──>  Standard Output  (Alapértelmezés: Képernyő/Konzol)  |
+| FD 2 (stderr) ──>  Standard Error   (Alapértelmezés: Képernyő/Konzol)  |
++-----------------------------------------------------------------------+
+            </pre>
+
+            <ul>
+                <li><strong>FD 0 — `stdin` (Standard Input):** A bemeneti adatfolyam, ahonnan a folyamat az adatokat olvassa.</li>
+                <li><strong>FD 1 — `stdout` (Standard Output):** A normál kimeneti adatfolyam, ahová a folyamat a sikeres eredményeket írja.</li>
+                <li><strong>FD 2 — `stderr` (Standard Error):** A hibakimeneti adatfolyam, ahová a folyamat a hibaüzeneteket és figyelmeztetéseket küldi.</li>
+            </ul>
+
+            <h4>2. Átirányító operátorok</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Operátor</th>
+                        <th>Működés és leírás</th>
+                        <th>Példa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>></code></td>
+                        <td>**Stdout felülírása fájlba.** Ha a fájl létezik, tartalmát törli!</td>
+                        <td><code>ls -l /etc > list.txt</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>>></code></td>
+                        <td>**Stdout hozzáfűzése fájlhoz.** A fájl meglévő tartalma után ír.</td>
+                        <td><code>echo "új sor" >> log.txt</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>2></code></td>
+                        <td>**Stderr (hibakimenet) felülírása fájlba.**</td>
+                        <td><code>find /root 2> errors.log</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>2>></code></td>
+                        <td>**Stderr hozzáfűzése fájlhoz.**</td>
+                        <td><code>parancs 2>> errors.log</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>2>&1</code></td>
+                        <td>**Stderr átirányítása az Stdout csatornára.**</td>
+                        <td><code>parancs > output.log 2>&1</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>&></code> vagy <code>>&</code></td>
+                        <td>**Stdout ÉS Stderr együttes felülírása fájlba** (Bash rövidítés).</td>
+                        <td><code>parancs &> minden.log</code></td>
+                    </tr>
+                    <tr>
+                        <td><code><</code></td>
+                        <td>**Stdin átirányítása fájlból** (fájl tartalmának beadása bemenetként).</td>
+                        <td><code>sort < lista.txt</code></td>
+                    </tr>
+                    <tr>
+                        <td><code><< EOF</code></td>
+                        <td>**Here-document (Here-doc):** Többsoros bemenet átadása a megadott lezáró címkéig (EOF).</td>
+                        <td><code>cat << EOF > file.txt</code><br>sor1<br>sor2<br><code>EOF</code></td>
+                    </tr>
+                    <tr>
+                        <td><code><<<</code></td>
+                        <td>**Here-string:** Egyetlen szöveg átadása a standard bemenetre.</td>
+                        <td><code>base64 -d <<< "SGVsbG8="</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>3. Csővezeték (Pipe - `|`) és a `tee` parancs</h4>
+            <ul>
+                <li><strong>Csővezeték (Pipe - `|`):** Az első parancs `stdout` (FD 1) kimenetét **közvetlenül a második parancs `stdin` (FD 0) bemenetéhez köti a memóriában**, lemezre írás nélkül.
+                    <br><em>Példa:</em> <code>cat /etc/passwd | grep bash | cut -d: -f1 | sort</code></li>
+                <li><strong>`tee` parancs:** Úgy működik, mint egy csőhálózati T-idom: a kapott bemenetet **egyszerre írja a standard kimenetre (képernyőre) ÉS menti el fájlba**.
+                    <br><em>Példa:</em> <code>df -h | tee disk_usage.txt</code> (Látjuk a képernyőn is és el is menti).</li>
+            </ul>
+
+            <h4>4. Speciális I/O Eszközfájlok</h4>
+            <ul>
+                <li><strong>`/dev/null` ("Bit-bucket / Fekete lyuk"):** Egy virtuális eszköz, amely elnyel minden beleírt adatot. Olvasáskor azonnal EOF-ot (End-Of-File) ad vissza.
+                    <br><em>Használat (Hibaüzenetek elnyomása):</em> <code>find / -name "*.conf" 2> /dev/null</code></li>
+                <li><strong>`/dev/zero`:** Egy virtuális eszköz, amelyből olvasva **végtelenített null-bájt (`0x00`) sorozatot** kapunk.
+                    <br><em>Használat (Üres fájlok / Swap lemezképek létrehozása):</em> <code>dd if=/dev/zero of=/swapfile bs=1M count=2048</code></li>
+            </ul>
+
+            <div class="qa-box">
+                <div class="qa-title">Tipikus vizsgakérdések és válaszok</div>
+                <p><strong>K: Mi a különbség a `>` és a `>>` operátorok között?</strong><br>
+                <em>V:</em> A `>` operátor felülírja a célfájl tartalmát (törli az előző tartalmat), míg a `>>` operátor a meglévő fájl végére fűzi hozzá az új kimenetet.</p>
+                <p><strong>K: Hogyan némíthatjuk el egy parancs hibaüzeneteit, hogy ne jelenjenek meg a képernyőn?</strong><br>
+                <em>V:</em> A 2-es fájlleíró (stderr) átirányításával a `/dev/null` eszközre: `parancs 2> /dev/null`.</p>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
